@@ -3,7 +3,8 @@ package main
 import (
 	"runtime"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -18,11 +19,18 @@ func main() {
 	}
 	defer window.Terminate()
 
+	i := 0
 	window.Run(func() {
+		if i%200 == 0 {
+			gl.ClearColor(0.3, 0.5, 0.3, 1.0)
+		} else if i%100 == 0 {
+			gl.ClearColor(0.5, 0.3, 0.3, 1.0)
+		}
 		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.ClearColor(0.3, 0.5, 0.3, 1.0)
 
 		window.PollEvents()
 		window.SwapBuffers()
+
+		i += 1
 	})
 }

@@ -59,8 +59,9 @@ func ClearColor(r, g, b, a float32) {
 }
 
 const (
-	COLOR_BUFFER_BIT = gl.COLOR_BUFFER_BIT
-	DEPTH_BUFFER_BIT = gl.DEPTH_BUFFER_BIT
+	DEPTH_BUFFER_BIT   = gl.DEPTH_BUFFER_BIT
+	STENCIL_BUFFER_BIT = gl.STENCIL_BUFFER_BIT
+	COLOR_BUFFER_BIT   = gl.COLOR_BUFFER_BIT
 )
 
 func Clear(mask uint32) {
