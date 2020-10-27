@@ -29,13 +29,18 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "hello window!")
+	window, err := gl.NewWindow(width, height, "hello triangle!")
 	if err != nil {
 		panic(err)
 	}
 	defer window.Terminate()
 
-	shader := gl.CompileShader(vertexShader, fragShader)
+	shader, err := gl.CompileShader(vertexShader, fragShader)
+	if err != nil {
+		panic(err)
+	}
+
+	shader.Use()
 	vao := gl.NewVAO(gl.TRIANGLES, []int32{3}, []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
@@ -44,11 +49,7 @@ func main() {
 
 	i := 0
 	window.Run(func() {
-		if i%200 == 0 {
-			gl.ClearColor(0.3, 0.5, 0.3, 1.0)
-		} else if i%100 == 0 {
-			gl.ClearColor(0.5, 0.3, 0.3, 1.0)
-		}
+		gl.ClearColor(0.3, 0.5, 0.3, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		vao.Draw()
