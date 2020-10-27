@@ -5,6 +5,7 @@ import (
 
 	"errors"
 	"github.com/go-gl/gl/v4.1-core/gl"
+	mgl "github.com/go-gl/mathgl/mgl32"
 )
 
 type Shader struct {
@@ -48,11 +49,6 @@ func CompileShader(vertexCode string, fragmentCode string) (*Shader, error) {
 	return &Shader{id}, nil
 }
 
-func (s *Shader) Use() *Shader {
-	gl.UseProgram(s.id)
-	return s
-}
-
 func checkCompileErrors(shader uint32, shaderType string) error {
 	var success int32
 	var infoLog [1024]byte
@@ -76,4 +72,48 @@ func checkCompileErrors(shader uint32, shaderType string) error {
 			"|" + string(infoLog[:1024]) + "|")
 	}
 	return nil
+}
+
+func (s *Shader) Use() *Shader {
+	gl.UseProgram(s.id)
+	return s
+}
+
+func (s *Shader) SetBool(name string, value bool) *Shader {
+	var intValue int32 = 0
+	if value {
+		intValue = 1
+	}
+
+	gl.Uniform1i(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")),
+		intValue)
+	return s
+}
+
+func (s *Shader) SetInt(name string, value int32) *Shader {
+	gl.Uniform1i(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")), value)
+	return s
+}
+
+func (s *Shader) SetFloat(name string, value float32) *Shader {
+	gl.Uniform1f(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")), value)
+	return s
+}
+
+func (s *Shader) SetVec2(name string, value mgl.Vec2) *Shader {
+	gl.Uniform2fv(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")),
+		1, &value[0])
+	return s
+}
+
+func (s *Shader) SetVec3(name string, value mgl.Vec3) *Shader {
+	gl.Uniform3fv(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")),
+		1, &value[0])
+	return s
+}
+
+func (s *Shader) SetMat4(name string, value mgl.Mat4) *Shader {
+	gl.UniformMatrix4fv(gl.GetUniformLocation(s.id, gl.Str(name+"\x00")),
+		1, false, &value[0])
+	return s
 }

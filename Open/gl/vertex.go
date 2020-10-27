@@ -12,7 +12,13 @@ type VAO struct {
 }
 
 const (
-	TRIANGLES = gl.TRIANGLES
+	POINTS         = gl.POINTS
+	LINES          = gl.LINES
+	LINE_LOOP      = gl.LINE_LOOP
+	LINE_STRIP     = gl.LINE_STRIP
+	TRIANGLES      = gl.TRIANGLES
+	TRIANGLE_STRIP = gl.TRIANGLE_STRIP
+	TRIANGLE_FAN   = gl.TRIANGLE_FAN
 )
 
 func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
@@ -32,7 +38,7 @@ func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
 	for i, offset := range offsets {
 		gl.EnableVertexAttribArray(uint32(i))
 		gl.VertexAttribPointer(uint32(i), offset, gl.FLOAT,
-			false, 4*offset, gl.PtrOffset(int(offsetAmount)))
+			false, 4*sumOffsets, gl.PtrOffset(int(offsetAmount*4)))
 		offsetAmount += offset
 	}
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)

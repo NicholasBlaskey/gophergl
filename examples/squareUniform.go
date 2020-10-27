@@ -1,10 +1,11 @@
 package main
 
 import (
-	"runtime"
+	"math"
 
-	"github.com/nicholasblaskey/gophergl/Web/gl"
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	"runtime"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -14,16 +15,24 @@ func init() {
 const (
 	vertexShader = `#version 410 core
 	layout (location = 0) in vec3 position;
+	layout (location = 1) in vec2 color;
+
+	out vec2 rgIn;
 	void main()
 	{
-		gl_Position = vec4(position.x, position.y, position.z, 1.0);
+		rgIn = color;
+		gl_Position = vec4(position, 1.0);
 	}`
 
 	fragShader = `#version 410 core
 	out vec4 color;
+	in vec2 rgIn;
+
+	uniform float redAmount;
+
 	void main()
 	{
-		color = vec4(0.5, 0.5, 0.7, 1.0);
+		color = vec4(rgIn, redAmount, 1.0);
 	}`
 )
 
@@ -41,16 +50,20 @@ func main() {
 	}
 	shader.Use()
 
-	vao := gl.NewVAO(gl.TRIANGLES, []int32{3}, []float32{
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.0, 0.5, 0.0,
+	vao := gl.NewVAO(gl.TRIANGLE_FAN, []int32{3, 2}, []float32{
+		// Pos, then color
+		+0.5, +0.5, 0.0, 0.1, 0.5,
+		+0.5, -0.5, 0.0, 0.1, 0.9,
+		-0.5, -0.5, 0.0, 0.5, 0.1,
+		-0.5, +0.5, 0.0, 0.9, 0.1,
 	})
 
 	window.Run(func() {
-		gl.ClearColor(0.3, 0.5, 0.3, 1.0)
+		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
+		t := float32(math.Sin(float64(window.GetTime() * 5.0)))
+		shader.SetFloat("redAmount", t+1.0)
 		vao.Draw()
 
 		window.PollEvents()
