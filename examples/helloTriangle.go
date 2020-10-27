@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	"github.com/nicholasblaskey/gophergl/Web/gl"
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -23,7 +23,7 @@ const (
 	out vec4 color;
 	void main()
 	{
-		color = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+		color = vec4(1.0, 0.5, 0.2, 1.0);
 	}`
 )
 

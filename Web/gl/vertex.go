@@ -31,7 +31,9 @@ func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
 
 	offsetAmount := int32(0)
 	for i, offset := range offsets {
-		attribLoc := webgl.Call("getAttribLocation", currentBoundShader, i)
+		attribLoc := webgl.Call("getAttribLocation", currentBoundShader.shader,
+			currentBoundShader.attribNames[i])
+		webgl.Call("enableVertexAttribArray", attribLoc)
 		webgl.Call("vertexAttribPointer", attribLoc, sumOffsets, FLOAT, false,
 			4*offset, offsetAmount)
 		offsetAmount += offset
