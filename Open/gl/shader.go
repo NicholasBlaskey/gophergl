@@ -8,7 +8,7 @@ import (
 )
 
 type Shader struct {
-	ID uint32
+	id uint32
 }
 
 func CompileShader(vertexCode string, fragmentCode string) (*Shader, error) {
@@ -36,20 +36,20 @@ func CompileShader(vertexCode string, fragmentCode string) (*Shader, error) {
 	}
 
 	// Create a shader program
-	ID := gl.CreateProgram()
-	gl.AttachShader(ID, vertexShader)
-	gl.AttachShader(ID, fragmentShader)
-	gl.LinkProgram(ID)
-	err = checkCompileErrors(ID, "PROGRAM")
+	id := gl.CreateProgram()
+	gl.AttachShader(id, vertexShader)
+	gl.AttachShader(id, fragmentShader)
+	gl.LinkProgram(id)
+	err = checkCompileErrors(id, "PROGRAM")
 	if err != nil {
 		return nil, err
 	}
 
-	return &Shader{ID: ID}, nil
+	return &Shader{id}, nil
 }
 
 func (s *Shader) Use() *Shader {
-	gl.UseProgram(s.ID)
+	gl.UseProgram(s.id)
 	return s
 }
 

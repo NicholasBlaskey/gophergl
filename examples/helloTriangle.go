@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -39,15 +39,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	shader.Use()
+
 	vao := gl.NewVAO(gl.TRIANGLES, []int32{3}, []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
 		0.0, 0.5, 0.0,
 	})
 
-	i := 0
 	window.Run(func() {
 		gl.ClearColor(0.3, 0.5, 0.3, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -56,7 +55,5 @@ func main() {
 
 		window.PollEvents()
 		window.SwapBuffers()
-
-		i += 1
 	})
 }
