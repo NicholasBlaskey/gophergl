@@ -26,17 +26,15 @@ const (
 	out vec4 color;
 
 	uniform vec2 dims;
-	uniform int squareAmount;
+	uniform float squareAmount;
 	uniform vec3 col1;
 	uniform vec3 col2;
 
 	void main()
 	{	
-		float u = gl_FragCoord.x / dims.x;
-		float v = gl_FragCoord.y / dims.y;		
-		float col = mod(floor(squareAmount * u) + floor(squareAmount * v), 2.0);
-	
-		gl_FragColor = vec4((1 - col) * col1 + col * col2, 1.0);
+		vec2 uv = floor(vec2(gl_FragCoord) / dims * squareAmount);
+		float isEven = mod(uv.x + uv.y, 2.0);	
+		gl_FragColor = vec4((1.0 - isEven) * col1 + isEven * col2, 1.0);
 	}`
 )
 
@@ -66,7 +64,7 @@ func main() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
-		shader.SetInt("squareAmount", 10)
+		shader.SetFloat("squareAmount", 10.0)
 		shader.SetVec2("dims", mgl.Vec2{float32(width), float32(height)})
 		shader.SetVec3("col1", mgl.Vec3{0.3, 0.5, 0.3})
 		shader.SetVec3("col2", mgl.Vec3{0.3, 0.3, 0.5})
