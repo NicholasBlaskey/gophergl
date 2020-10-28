@@ -32,7 +32,17 @@ const (
 
 	void main()
 	{	
-		color = vec4(vec3(1.0 - texture(texture1, uv)), 1.0);
+		vec2 tileAmount = floor(uv);
+		float isEven = mod(tileAmount.x + tileAmount.y, 2.0);
+		vec3 tOut = vec3(texture(texture1, uv));
+		
+		if (isEven == 0.0) {
+			color = vec4(1.0 - tOut, 1.0);
+		} else {
+			color = vec4(tOut, 1.0);
+		}
+
+		//color = vec4(vec3(1.0 - texture(texture1, uv)), 1.0);
 	}`
 )
 
@@ -52,23 +62,30 @@ func main() {
 
 	vao := gl.NewVAO(gl.TRIANGLE_FAN, []int32{2, 2}, []float32{
 		// Pos, then tex coords
-		+0.9, +0.9, 1.0, 0.0,
-		+0.9, -0.9, 1.0, 1.0,
-		-0.9, -0.9, 0.0, 1.0,
+		+0.9, +0.9, 4.0, 0.0,
+		+0.9, -0.9, 4.0, 4.0,
+		-0.9, -0.9, 0.0, 4.0,
 		-0.9, +0.9, 0.0, 0.0,
 	})
 
-	texture := gl.TextureFromFile("./images/gopher.jpg")
-	texture.Bind(gl.TEXTURE0)
+	t1 := gl.TextureFromFile("./images/gopher.jpg")
+	t2 := gl.TextureFromFile("./images/turtle.jpg")
+	t1.Bind(gl.TEXTURE0)
+	t2.Bind(gl.TEXTURE1)
 
+	i := 0
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
-		shader.SetInt("texture1", 0)
-
+		if i%200 == 0 {
+			shader.SetInt("texture1", 0)
+		} else if i%100 == 0 {
+			shader.SetInt("texture1", 1)
+		}
 		vao.Draw()
 
+		i += 1
 		window.PollEvents()
 		window.SwapBuffers()
 	})

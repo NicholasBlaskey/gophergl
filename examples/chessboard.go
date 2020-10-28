@@ -23,7 +23,7 @@ const (
 	}`
 
 	fragShader = `#version 410 core
-	out vec4 color;
+	out vec4 FragColor;
 
 	uniform vec2 dims;
 	uniform float squareAmount;
@@ -34,7 +34,7 @@ const (
 	{	
 		vec2 uv = floor(vec2(gl_FragCoord) / dims * squareAmount);
 		float isEven = mod(uv.x + uv.y, 2.0);	
-		color = vec4((1.0 - isEven) * col1 + isEven * col2, 1.0);
+		FragColor = vec4((1.0 - isEven) * col1 + isEven * col2, 1.0);
 	}`
 )
 

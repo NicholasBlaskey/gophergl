@@ -61,9 +61,9 @@ func convertToWebShader(shader string, isVertex bool) (string, []string) {
 		shader = "precision mediump float;\n" + shader
 
 		// Remove out vec4 color;
-		shader = strings.ReplaceAll(shader, "out vec4 color;", "")
+		shader = strings.ReplaceAll(shader, "out vec4 FragColor;", "")
 		// Replace color with gl_FragColor
-		shader = strings.ReplaceAll(shader, "color", "gl_FragColor")
+		shader = strings.ReplaceAll(shader, "FragColor", "gl_FragColor")
 		// Replace in with varying
 		shader = strings.ReplaceAll(shader, "in ", "varying ")
 	} else {

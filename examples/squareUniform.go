@@ -26,14 +26,14 @@ const (
 	}`
 
 	fragShader = `#version 410 core
-	out vec4 color;
+	out vec4 FragColor;
 	in vec2 rgIn;
 
 	uniform float redAmount;
 
 	void main()
 	{
-		color = vec4(rgIn, redAmount, 1.0);
+		FragColor = vec4(rgIn, redAmount, 1.0);
 	}`
 )
 
