@@ -4,10 +4,12 @@ import (
 	"errors"
 
 	"github.com/gopherjs/gopherjs/js"
+	"time"
 )
 
 type Window struct {
-	window *js.Object
+	window    *js.Object
+	startTime time.Time
 }
 
 var webgl *js.Object = nil
@@ -35,12 +37,14 @@ func NewWindow(width, height int32, title string) (*Window, error) {
 			return nil, errors.New("Browser does not support webgl context")
 		}
 	}
-	return &Window{canvas}, nil
+	return &Window{canvas, time.Now()}, nil
 }
 
 func (w *Window) Terminate() {}
 
-func (w *Window) GetTime() float32 { return 0.0 }
+func (w *Window) GetTime() float32 {
+	return float32(time.Now().Sub(w.startTime).Seconds())
+}
 
 func (w *Window) PollEvents() {}
 

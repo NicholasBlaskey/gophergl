@@ -1,11 +1,12 @@
 package main
 
 import (
+	"runtime"
+
 	"math"
 
-	"runtime"
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -38,7 +39,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "hello triangle!")
+	window, err := gl.NewWindow(width, height, "square uniform")
 	if err != nil {
 		panic(err)
 	}

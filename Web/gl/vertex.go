@@ -2,10 +2,6 @@ package gl
 
 import ()
 
-const (
-	TRIANGLES = 0x0004
-)
-
 type VAO struct {
 	VAO           uint32
 	VBO           uint32
@@ -16,7 +12,16 @@ type VAO struct {
 const (
 	ARRAY_BUFFER = 0x8892
 	STATIC_DRAW  = 0x88E4
-	FLOAT        = 0x1406
+
+	POINTS         = 0x0000
+	LINES          = 0x0001
+	LINE_LOOP      = 0x0002
+	LINE_STRIP     = 0x0003
+	TRIANGLES      = 0x0004
+	TRIANGLE_STRIP = 0x0005
+	TRIANGLE_FAN   = 0x0006
+
+	FLOAT = 0x1406
 )
 
 func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
@@ -34,8 +39,8 @@ func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
 		attribLoc := webgl.Call("getAttribLocation", currentBoundShader.shader,
 			currentBoundShader.attribNames[i])
 		webgl.Call("enableVertexAttribArray", attribLoc)
-		webgl.Call("vertexAttribPointer", attribLoc, sumOffsets, FLOAT, false,
-			4*offset, offsetAmount)
+		webgl.Call("vertexAttribPointer", attribLoc, offset, FLOAT, false,
+			4*sumOffsets, offsetAmount*4)
 		offsetAmount += offset
 	}
 	//gl.enableVertexAttribArray(positionAttributeLocation);
