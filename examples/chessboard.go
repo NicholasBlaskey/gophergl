@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 )
@@ -34,7 +34,7 @@ const (
 	{	
 		vec2 uv = floor(vec2(gl_FragCoord) / dims * squareAmount);
 		float isEven = mod(uv.x + uv.y, 2.0);	
-		gl_FragColor = vec4((1.0 - isEven) * col1 + isEven * col2, 1.0);
+		color = vec4((1.0 - isEven) * col1 + isEven * col2, 1.0);
 	}`
 )
 
@@ -53,7 +53,6 @@ func main() {
 	shader.Use()
 
 	vao := gl.NewVAO(gl.TRIANGLE_FAN, []int32{2}, []float32{
-		// Pos, then color
 		+1.0, +1.0,
 		+1.0, -1.0,
 		-1.0, -1.0,
