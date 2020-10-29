@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -25,7 +25,7 @@ const (
 	}`
 
 	fragShader = `#version 410 core
-	out vec4 color;
+	out vec4 FragColor;
 	in vec2 uv;
 	
 	uniform sampler2D texture1;
@@ -37,12 +37,11 @@ const (
 		vec3 tOut = vec3(texture(texture1, uv));
 		
 		if (isEven == 0.0) {
-			color = vec4(1.0 - tOut, 1.0);
+			FragColor = vec4(1.0 - tOut, 1.0);
 		} else {
-			color = vec4(tOut, 1.0);
+			FragColor = vec4(tOut, 1.0);
 		}
 
-		//color = vec4(vec3(1.0 - texture(texture1, uv)), 1.0);
 	}`
 )
 

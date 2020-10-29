@@ -66,6 +66,8 @@ func convertToWebShader(shader string, isVertex bool) (string, []string) {
 		shader = strings.ReplaceAll(shader, "FragColor", "gl_FragColor")
 		// Replace in with varying
 		shader = strings.ReplaceAll(shader, "in ", "varying ")
+		// Replace texture with texture2d
+		shader = strings.ReplaceAll(shader, "texture(", "texture2D(")
 	} else {
 		// TODO make this run instead of just relying on location
 		// Replace layout with attribute
