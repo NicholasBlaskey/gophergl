@@ -94,8 +94,8 @@ func convertToWebShader(shader string, isVertex bool) (string, []string) {
 	}
 
 	fmt.Println(shader)
-	//fmt.Println("ATTRIBS")
-	//fmt.Println(len(attribNames), attribNames)
+	fmt.Println("ATTRIBS")
+	fmt.Println(len(attribNames), attribNames)
 
 	return shader, attribNames
 }

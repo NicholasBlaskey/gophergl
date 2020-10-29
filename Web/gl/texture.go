@@ -1,6 +1,8 @@
 package gl
 
 import (
+	"fmt"
+
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -90,6 +92,7 @@ func isPowerOf2(value int32) bool {
 }
 
 func (t *Texture) setTextParams(width, height int32) {
+	fmt.Println(width, height)
 	if isPowerOf2(width) && isPowerOf2(height) {
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, t.WrapS)
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, t.WrapT)
@@ -99,20 +102,22 @@ func (t *Texture) setTextParams(width, height int32) {
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE)
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
+		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
 	}
 
 }
 
 func TextureFromFile(file string) *Texture {
 	t := NewTexture()
-	webgl.Call("bindTexture", t.texture)
+	webgl.Call("bindTexture", TEXTURE_2D, t.texture)
 	webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA,
 		1, 1, 0, RGBA, UNSIGNED_BYTE, []byte{39, 0, 0, 255})
 
 	img := js.Global.Get("Image").New()
 	img.Set("src", file)
-	img.Set("crossOrigin", "")
+	//img.Set("crossOrigin", "")
 	img.Call("addEventListener", "load", func() {
+		webgl.Call("bindTexture", TEXTURE_2D, t.texture)
 		webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA, RGBA,
 			UNSIGNED_BYTE, img)
 		t.setTextParams(int32(img.Get("width").Int()),

@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	"github.com/nicholasblaskey/gophergl/Web/gl"
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -13,7 +13,7 @@ func init() {
 
 const (
 	vertexShader = `#version 410 core
-	layout (location = 0) in vec2 position;	
+	layout (location = 0) in vec2 position;
 	layout (location = 1) in vec2 auv;
 	
 	out vec2 uv;
@@ -69,6 +69,8 @@ func main() {
 
 	t1 := gl.TextureFromFile("./images/gopher.jpg")
 	t2 := gl.TextureFromFile("./images/turtle.jpg")
+	//_ = t1
+	//_ = t2
 	t1.Bind(gl.TEXTURE0)
 	t2.Bind(gl.TEXTURE1)
 
