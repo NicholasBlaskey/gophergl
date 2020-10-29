@@ -3,6 +3,8 @@ package gl
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 
+	//"fmt"
+
 	"image"
 	"image/draw"
 	_ "image/jpeg"
@@ -23,7 +25,7 @@ const (
 )
 
 type Texture struct {
-	ID             uint32
+	id             uint32
 	Width          int32
 	Height         int32
 	InternalFormat int32
@@ -43,13 +45,13 @@ func NewTexture() *Texture {
 		FilterMin:      gl.LINEAR,
 		FilterMax:      gl.LINEAR,
 	}
-	gl.GenTextures(1, &t.ID)
+	gl.GenTextures(1, &t.id)
 	return &t
 }
 
 func (t *Texture) Generate(width, height int32, data []byte) {
 	t.Width, t.Height = width, height
-	gl.BindTexture(gl.TEXTURE_2D, t.ID)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 
 	var dataPtr unsafe.Pointer
 	if data != nil {
@@ -65,16 +67,16 @@ func (t *Texture) Generate(width, height int32, data []byte) {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func TextureFromFile(file string) *Texture {
+func TextureFromFile(file string) (*Texture, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer f.Close()
 
 	img, _, err := image.Decode(f)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	rgba := image.NewRGBA(img.Bounds())
@@ -82,10 +84,10 @@ func TextureFromFile(file string) *Texture {
 
 	t := NewTexture()
 	t.Generate(int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y), rgba.Pix)
-	return t
+	return t, nil
 }
 
 func (t *Texture) Bind(num uint32) {
 	gl.ActiveTexture(num)
-	gl.BindTexture(gl.TEXTURE_2D, t.ID)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 }

@@ -1,7 +1,7 @@
 package gl
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -65,26 +65,9 @@ func (t *Texture) Generate(width, height int32, data []byte) {
 	t.Width, t.Height = width, height
 
 	webgl.Call("bindTexture", t.texture)
-	//webgl.Call("texImage2D", gl.TEXTURE_2D, 0, gl.RGBA,
-	//	1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
-
 	webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA, RGBA,
 		UNSIGNED_BYTE, data)
 	t.setTextParams(width, height)
-	/*
-		var dataPtr unsafe.Pointer
-		if data != nil {
-			dataPtr = gl.Ptr(data)
-		}
-		gl.TexImage2D(gl.TEXTURE_2D, 0, t.InternalFormat, width, height, 0,
-			t.ImageFormat, gl.UNSIGNED_BYTE, dataPtr)
-
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, t.WrapS)
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, t.WrapT)
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, t.FilterMin)
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, t.FilterMax)
-		gl.BindTexture(gl.TEXTURE_2D, 0)
-	*/
 }
 
 func isPowerOf2(value int32) bool {
@@ -92,7 +75,6 @@ func isPowerOf2(value int32) bool {
 }
 
 func (t *Texture) setTextParams(width, height int32) {
-	fmt.Println(width, height)
 	if isPowerOf2(width) && isPowerOf2(height) {
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, t.WrapS)
 		webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, t.WrapT)
@@ -107,7 +89,7 @@ func (t *Texture) setTextParams(width, height int32) {
 
 }
 
-func TextureFromFile(file string) *Texture {
+func TextureFromFile(file string) (*Texture, error) {
 	t := NewTexture()
 	webgl.Call("bindTexture", TEXTURE_2D, t.texture)
 	webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA,
@@ -115,16 +97,20 @@ func TextureFromFile(file string) *Texture {
 
 	img := js.Global.Get("Image").New()
 	img.Set("src", file)
-	//img.Set("crossOrigin", "")
+
+	h, w := img.Get("height").Int(), img.Get("width").Int()
+	if h == 0 || w == 0 {
+		return nil, errors.New(file + ": failed to load")
+	}
+
 	img.Call("addEventListener", "load", func() {
 		webgl.Call("bindTexture", TEXTURE_2D, t.texture)
-		webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA, RGBA,
-			UNSIGNED_BYTE, img)
-		t.setTextParams(int32(img.Get("width").Int()),
-			int32(img.Get("height").Int()))
+		webgl.Call("texImage2D", TEXTURE_2D, 0, t.InternalFormat,
+			t.ImageFormat, UNSIGNED_BYTE, img)
+		t.setTextParams(int32(w), int32(h))
 	}, false)
 
-	return t
+	return t, nil
 }
 
 func (t *Texture) Bind(num uint32) {

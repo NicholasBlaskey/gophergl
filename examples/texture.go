@@ -3,8 +3,8 @@ package main
 import (
 	"runtime"
 
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -67,10 +67,15 @@ func main() {
 		-0.9, +0.9, 0.0, 0.0,
 	})
 
-	t1 := gl.TextureFromFile("./images/gopher.jpg")
-	t2 := gl.TextureFromFile("./images/turtle.jpg")
-	//_ = t1
-	//_ = t2
+	t1, err := gl.TextureFromFile("./images/gopher.jpg")
+	if err != nil {
+		panic(err)
+	}
+	t2, err := gl.TextureFromFile("./images/turtle.jpg")
+	if err != nil {
+		panic(err)
+	}
+
 	t1.Bind(gl.TEXTURE0)
 	t2.Bind(gl.TEXTURE1)
 
@@ -80,9 +85,9 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		if i%200 == 0 {
-			shader.SetInt("texture1", 0)
-		} else if i%100 == 0 {
 			shader.SetInt("texture1", 1)
+		} else if i%100 == 0 {
+			shader.SetInt("texture1", 0)
 		}
 		vao.Draw()
 
