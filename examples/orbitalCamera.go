@@ -118,16 +118,20 @@ func main() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+		shader.SetMat4("view", o.LookAt())
+
 		rotation := mgl.HomogRotate3D(window.GetTime(),
 			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
-		for i := float32(-1.5); i <= 1.5; i += 1.5 {
-			for j := float32(-1.5); j <= 1.5; j += 1.5 {
-				shader.SetMat4("model", mgl.Translate3D(i, j, -8.0).Mul4(rotation))
-				vao.Draw()
+		distApart := float32(0.75)
+		for i := -distApart; i <= distApart; i += distApart {
+			for j := -distApart; j <= distApart; j += distApart {
+				for k := -distApart; k <= distApart; k += distApart {
+					shader.SetMat4("model", mgl.Translate3D(i, j, k).Mul4(
+						rotation).Mul4(mgl.Scale3D(0.5, 0.5, 0.5)))
+					vao.Draw()
+				}
 			}
 		}
-
-		shader.SetMat4("view", o.LookAt())
 
 		window.PollEvents()
 		window.SwapBuffers()
