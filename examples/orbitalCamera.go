@@ -48,6 +48,7 @@ func main() {
 		panic(err)
 	}
 	defer window.Terminate()
+	window.OrbitialCamera()
 
 	gl.Enable(gl.DEPTH_TEST)
 
