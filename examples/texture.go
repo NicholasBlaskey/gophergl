@@ -75,7 +75,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	t1.Bind(gl.TEXTURE0)
 	t2.Bind(gl.TEXTURE1)
 
@@ -85,9 +84,9 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 
 		if i%200 == 0 {
-			shader.SetInt("texture1", 1)
-		} else if i%100 == 0 {
 			shader.SetInt("texture1", 0)
+		} else if i%100 == 0 {
+			shader.SetInt("texture1", 1)
 		}
 		vao.Draw()
 

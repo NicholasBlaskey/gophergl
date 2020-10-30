@@ -67,3 +67,16 @@ const (
 func Clear(mask uint32) {
 	gl.Clear(mask)
 }
+
+const (
+	DEPTH_TEST = gl.DEPTH_TEST
+	LEQUAL     = gl.LEQUAL
+)
+
+func Enable(v uint32) {
+	gl.Enable(v)
+}
+
+func DepthFunc(v uint32) {
+	gl.DepthFunc(v)
+}

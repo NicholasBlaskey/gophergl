@@ -151,6 +151,6 @@ func (s *Shader) SetVec3(name string, value mgl.Vec3) *Shader {
 
 func (s *Shader) SetMat4(name string, value mgl.Mat4) *Shader {
 	webgl.Call("uniformMatrix4fv", webgl.Call("getUniformLocation", s.shader, name),
-		value) // TODO verify this
+		false, value) // TODO verify this
 	return s
 }

@@ -63,3 +63,16 @@ const (
 func Clear(mask uint32) {
 	webgl.Call("clear", mask)
 }
+
+const (
+	DEPTH_TEST = 0x0B71
+	LEQUAL     = 0x0203
+)
+
+func Enable(v uint32) {
+	webgl.Call("enable", v)
+}
+
+func DepthFunc(v uint32) {
+	webgl.Call("depthFunc", v)
+}
