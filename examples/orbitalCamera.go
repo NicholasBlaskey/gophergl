@@ -21,12 +21,14 @@ const (
 	out vec2 uv;
 
 	uniform mat4 projection;
+	uniform mat4 view;
 	uniform mat4 model;
+
 
 	void main()
 	{
 		uv = auv;
-		gl_Position = projection * model * vec4(position, 1.0);
+		gl_Position = projection * view * model * vec4(position, 1.0);
 	}`
 
 	fragShader = `#version 410 core
@@ -48,7 +50,7 @@ func main() {
 		panic(err)
 	}
 	defer window.Terminate()
-	window.OrbitialCamera()
+	o := gl.NewOrbitalCamera(window)
 
 	gl.Enable(gl.DEPTH_TEST)
 
@@ -124,6 +126,8 @@ func main() {
 				vao.Draw()
 			}
 		}
+
+		shader.SetMat4("view", o.LookAt())
 
 		window.PollEvents()
 		window.SwapBuffers()
