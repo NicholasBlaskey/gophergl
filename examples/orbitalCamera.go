@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 	defer window.Terminate()
-	o := gl.NewOrbitalCamera(window)
+	camera := gl.NewOrbitalCamera(window, 5.0, mgl.Vec3{0.0, 0.0, 0.0})
 
 	gl.Enable(gl.DEPTH_TEST)
 
@@ -118,7 +118,7 @@ func main() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		shader.SetMat4("view", o.LookAt())
+		shader.SetMat4("view", camera.LookAt())
 
 		rotation := mgl.HomogRotate3D(window.GetTime(),
 			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
