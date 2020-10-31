@@ -1,10 +1,8 @@
-// Used this tutorial
+// Used this resource
 // https://andreasrohner.at/posts/Web%20Development/JavaScript/Simple-orbital-camera-controls-for-THREE-js/
 package gl
 
 import (
-	//"fmt"
-
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"math"
 
