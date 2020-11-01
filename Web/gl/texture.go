@@ -1,7 +1,8 @@
 package gl
 
 import (
-	"errors"
+	//"errors"
+	"fmt"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -99,9 +100,9 @@ func TextureFromFile(file string) (*Texture, error) {
 	img.Set("src", file)
 
 	h, w := img.Get("height").Int(), img.Get("width").Int()
-	if h == 0 || w == 0 {
-		return nil, errors.New(file + ": failed to load")
-	}
+	//if h == 0 || w == 0 {
+	//return nil, errors.New(file + ": failed to load")
+	//}
 
 	img.Call("addEventListener", "load", func() {
 		webgl.Call("bindTexture", TEXTURE_2D, t.texture)

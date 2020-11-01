@@ -1,5 +1,9 @@
 package gl
 
+import (
+	"fmt"
+)
+
 type VAO struct {
 	VAO           uint32
 	VBO           uint32
@@ -34,8 +38,10 @@ func NewVAO(primitiveType uint32, offsets []int32, verts []float32) *VAO {
 
 	offsetAmount := int32(0)
 	for i, offset := range offsets {
+		fmt.Println("IN CREATE VAO", currentBoundShader.attribNames[i])
 		attribLoc := webgl.Call("getAttribLocation", currentBoundShader.shader,
 			currentBoundShader.attribNames[i])
+		fmt.Println(currentBoundShader.attribNames[i], attribLoc)
 
 		webgl.Call("enableVertexAttribArray", attribLoc)
 		webgl.Call("vertexAttribPointer", attribLoc, offset, FLOAT, false,

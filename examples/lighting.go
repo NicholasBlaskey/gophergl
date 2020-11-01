@@ -6,8 +6,8 @@ import (
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"math"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -27,11 +27,12 @@ const (
 	uniform mat4 projection;
 	uniform mat4 view;
 	uniform mat4 model;
+	uniform mat4 normalMatrix;	
 
 	void main()
 	{
 		position = vec3(model * vec4(aPosition, 1.0));
-		normal = mat3(transpose(inverse(model))) * aNormal;
+		normal = normalize(mat3(normalMatrix) * aNormal);
 		uv = aUV;
 
 		gl_Position = projection * view * model * vec4(position, 1.0);
@@ -80,6 +81,7 @@ const (
 		vec3 emission = texture(material.glow, uv).rgb * material.glowIntensity;		
 
 		FragColor = vec4(ambient + diffuse + specular + emission, 1.0);
+		//FragColor = texture(material.glow, uv);
 	}`
 
 	lampVertex = `#version 410 core
@@ -123,6 +125,7 @@ func main() {
 		panic(err)
 	}
 
+	shader.Use()
 	vao := gl.NewVAO(gl.TRIANGLES, []int32{3, 3, 2}, []float32{
 		// positions          // normals           // texture coords
 		-0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 0.0,
@@ -170,14 +173,11 @@ func main() {
 
 	// Load textures
 	diffuse, err1 := gl.TextureFromFile("./images/glowCube/diffus.png")
-	normal, err2 := gl.TextureFromFile("./images/glowCube/normal.png")
+	specular, err2 := gl.TextureFromFile("./images/glowCube/specular.png")
 	glow, err3 := gl.TextureFromFile("./images/glowCube/glow.png")
 	if err1 != nil || err2 != nil || err3 != nil {
 		panic("Could not open a texture")
 	}
-	diffuse.Bind(gl.TEXTURE0)
-	normal.Bind(gl.TEXTURE1)
-	glow.Bind(gl.TEXTURE2)
 
 	// Set lighting details
 	shader.Use()
@@ -198,9 +198,17 @@ func main() {
 	lampShader.Use()
 	lampShader.SetMat4("projection", projection)
 
+	diffuse.Bind(gl.TEXTURE0)
+	specular.Bind(gl.TEXTURE1)
+	glow.Bind(gl.TEXTURE2)
+
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+		diffuse.Bind(gl.TEXTURE0)
+		specular.Bind(gl.TEXTURE1)
+		glow.Bind(gl.TEXTURE2)
 
 		// Draw cube
 		view := camera.LookAt()
@@ -215,6 +223,7 @@ func main() {
 		shader.SetFloat("material.glowIntensity",
 			float32(math.Sin(float64(window.GetTime()))))
 		shader.SetMat4("model", model)
+		shader.SetMat4("normalMatrix", model.Inv().Transpose())
 		vao.Draw()
 
 		// Draw lamp

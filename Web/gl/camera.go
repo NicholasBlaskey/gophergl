@@ -12,7 +12,7 @@ import (
 
 type OrbitalCamera struct {
 	center      mgl.Vec3
-	position    mgl.Vec3
+	Position    mgl.Vec3
 	startDragX  float64
 	startDragY  float64
 	mouseX      float64
@@ -26,7 +26,7 @@ var camera *OrbitalCamera = nil
 
 func NewOrbitalCamera(w *Window, radius float32, center mgl.Vec3) *OrbitalCamera {
 	camera = &OrbitalCamera{center: center,
-		position:    mgl.Vec3{radius, 0.0, 0.0},
+		Position:    mgl.Vec3{radius, 0.0, 0.0},
 		ScaleFactor: 0.1, Sensativity: math.Pi / 450.0}
 
 	w.window.Call("addEventListener", "mousedown", mouseDown)
@@ -39,24 +39,24 @@ func NewOrbitalCamera(w *Window, radius float32, center mgl.Vec3) *OrbitalCamera
 }
 
 func (c *OrbitalCamera) drag(deltaX, deltaY float64) {
-	radius, theta, phi := mgl.CartesianToSpherical(c.position)
+	radius, theta, phi := mgl.CartesianToSpherical(c.Position)
 
 	phi -= float32(float64(c.Sensativity) * deltaX)
 	theta = float32(math.Min(math.Max(
 		float64(theta)+float64(c.Sensativity)*deltaY, 0.001), math.Pi-0.001))
 
-	c.position = mgl.SphericalToCartesian(radius, theta, phi)
+	c.Position = mgl.SphericalToCartesian(radius, theta, phi)
 }
 
 func (c *OrbitalCamera) LookAt() mgl.Mat4 {
-	return mgl.LookAtV(c.position.Add(c.center), c.center, mgl.Vec3{0.0, 0.0, 1.0})
+	return mgl.LookAtV(c.Position.Add(c.center), c.center, mgl.Vec3{0.0, 0.0, 1.0})
 }
 
 func (c *OrbitalCamera) zoom(zoomIn bool) {
 	if zoomIn {
-		c.position = c.position.Sub(c.center).Mul(1.0 - c.ScaleFactor).Add(c.center)
+		c.Position = c.Position.Sub(c.center).Mul(1.0 - c.ScaleFactor).Add(c.center)
 	} else {
-		c.position = c.position.Sub(c.center).Mul(1.0 + c.ScaleFactor).Add(c.center)
+		c.Position = c.Position.Sub(c.center).Mul(1.0 + c.ScaleFactor).Add(c.center)
 	}
 }
 
