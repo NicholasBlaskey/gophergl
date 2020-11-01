@@ -198,10 +198,6 @@ func main() {
 	lampShader.Use()
 	lampShader.SetMat4("projection", projection)
 
-	diffuse.Bind(gl.TEXTURE0)
-	specular.Bind(gl.TEXTURE1)
-	glow.Bind(gl.TEXTURE2)
-
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

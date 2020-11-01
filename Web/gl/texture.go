@@ -2,7 +2,6 @@ package gl
 
 import (
 	//"errors"
-	"fmt"
 
 	"github.com/gopherjs/gopherjs/js"
 )
