@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	mgl "github.com/go-gl/mathgl/mgl32"
+	"math"
 
 	"github.com/nicholasblaskey/gophergl/Open/gl"
 	//"github.com/nicholasblaskey/gophergl/Web/gl"
@@ -47,6 +48,7 @@ const (
 		sampler2D diffuse;
 		sampler2D specular;
 		sampler2D glow;
+		float glowIntensity;
 		float shininess;
 	};
 
@@ -75,9 +77,29 @@ const (
 		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 		vec3 specular = light.specular * spec * texture(material.specular, uv).rgb;
 
-		vec3 emission = texture(material.glow, uv).rgb;		
+		vec3 emission = texture(material.glow, uv).rgb * material.glowIntensity;		
 
 		FragColor = vec4(ambient + diffuse + specular + emission, 1.0);
+	}`
+
+	lampVertex = `#version 410 core
+	layout (location = 0) in vec3 aPosition;
+
+	uniform mat4 model;
+	uniform mat4 view;
+	uniform mat4 projection;
+
+	void main() 
+	{
+		gl_Position = projection * view * model * vec4(aPosition, 1.0);
+	}`
+
+	lampFrag = `#version 410 core
+	out vec4 FragColor;
+
+	void main() 
+	{
+		FragColor = vec4(1.0);
 	}`
 )
 
@@ -96,49 +118,54 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	lampShader, err := gl.CompileShader(lampVertex, lampFrag)
+	if err != nil {
+		panic(err)
+	}
 
-	vao := gl.NewVAO(gl.TRIANGLES, []int32{3, 2}, []float32{
-		-0.5, -0.5, -0.5, 0.0, 0.0,
-		0.5, -0.5, -0.5, 1.0, 0.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		-0.5, 0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 0.0,
+	vao := gl.NewVAO(gl.TRIANGLES, []int32{3, 3, 2}, []float32{
+		// positions          // normals           // texture coords
+		-0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 0.0,
+		0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 1.0, 0.0,
+		0.5, 0.5, -0.5, 0.0, 0.0, -1.0, 1.0, 1.0,
+		0.5, 0.5, -0.5, 0.0, 0.0, -1.0, 1.0, 1.0,
+		-0.5, 0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, 0.0, -1.0, 0.0, 0.0,
 
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 1.0,
-		0.5, 0.5, 0.5, 1.0, 1.0,
-		-0.5, 0.5, 0.5, 0.0, 1.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0,
+		0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0,
+		0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 1.0,
+		0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 1.0,
+		-0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+		-0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0,
 
-		-0.5, 0.5, 0.5, 1.0, 0.0,
-		-0.5, 0.5, -0.5, 1.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		-0.5, 0.5, 0.5, 1.0, 0.0,
+		-0.5, 0.5, 0.5, -1.0, 0.0, 0.0, 1.0, 0.0,
+		-0.5, 0.5, -0.5, -1.0, 0.0, 0.0, 1.0, 1.0,
+		-0.5, -0.5, -0.5, -1.0, 0.0, 0.0, 0.0, 1.0,
+		-0.5, -0.5, -0.5, -1.0, 0.0, 0.0, 0.0, 1.0,
+		-0.5, -0.5, 0.5, -1.0, 0.0, 0.0, 0.0, 0.0,
+		-0.5, 0.5, 0.5, -1.0, 0.0, 0.0, 1.0, 0.0,
 
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, 0.5, 0.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0,
+		0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 1.0,
+		0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 0.0, 1.0,
+		0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 0.0, 1.0,
+		0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.0, 0.0,
+		0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0,
 
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, -0.5, 1.0, 1.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
+		-0.5, -0.5, -0.5, 0.0, -1.0, 0.0, 0.0, 1.0,
+		0.5, -0.5, -0.5, 0.0, -1.0, 0.0, 1.0, 1.0,
+		0.5, -0.5, 0.5, 0.0, -1.0, 0.0, 1.0, 0.0,
+		0.5, -0.5, 0.5, 0.0, -1.0, 0.0, 1.0, 0.0,
+		-0.5, -0.5, 0.5, 0.0, -1.0, 0.0, 0.0, 0.0,
+		-0.5, -0.5, -0.5, 0.0, -1.0, 0.0, 0.0, 1.0,
 
-		-0.5, 0.5, -0.5, 0.0, 1.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		-0.5, 0.5, 0.5, 0.0, 0.0,
-		-0.5, 0.5, -0.5, 0.0, 1.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
+		0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 1.0,
+		0.5, 0.5, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0,
+		0.5, 0.5, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0,
+		-0.5, 0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 0.0,
+		-0.5, 0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
 	})
 
 	// Load textures
@@ -157,27 +184,49 @@ func main() {
 	shader.SetInt("material.diffuse", 0)
 	shader.SetInt("material.specular", 1)
 	shader.SetInt("material.glow", 2)
-	shader.SetFloat("material.shininess", 72.0)
+	shader.SetFloat("material.shininess", 64.0)
 
-	shader.SetVec3("light.position", mgl.Vec3{1.2, 1.0, 2.0})
-	shader.SetVec3("light.ambient", mgl.Vec3{0.1, 0.1, 0.1})
-	shader.SetVec3("light.diffuse", mgl.Vec3{0.5, 0.5, 0.5})
+	lightPos := mgl.Vec3{1.2, 1.0, 2.0}
+	shader.SetVec3("light.ambient", mgl.Vec3{0.3, 0.3, 0.3})
+	shader.SetVec3("light.diffuse", mgl.Vec3{0.55, 0.55, 0.55})
 	shader.SetVec3("light.specular", mgl.Vec3{1.0, 1.0, 1.0})
 
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
 	shader.SetMat4("projection", projection)
+
+	lampShader.Use()
+	lampShader.SetMat4("projection", projection)
+
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		shader.SetMat4("view", camera.LookAt())
-		shader.SetVec3("viewPos", camera.Position)
-
-		model := mgl.HomogRotate3D(window.GetTime(),
+		// Draw cube
+		view := camera.LookAt()
+		model := mgl.HomogRotate3D(mgl.DegToRad(45.0),
 			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
+
+		shader.Use()
+		shader.SetVec3("light.position", lightPos)
+
+		shader.SetMat4("view", view)
+		shader.SetVec3("viewPos", camera.Position)
+		shader.SetFloat("material.glowIntensity",
+			float32(math.Sin(float64(window.GetTime()))))
 		shader.SetMat4("model", model)
 		vao.Draw()
+
+		// Draw lamp
+		model = mgl.Translate3D(lightPos[0], lightPos[1], lightPos[2]).Mul4(
+			mgl.Scale3D(0.25, 0.25, 0.25))
+		lampShader.Use()
+		lampShader.SetMat4("view", view)
+		lampShader.SetMat4("model", model)
+		vao.Draw()
+
+		lightPos[0] = float32(math.Sin(float64(window.GetTime())))
+		lightPos[1] = float32(math.Cos(float64(window.GetTime())))
 
 		window.PollEvents()
 		window.SwapBuffers()
