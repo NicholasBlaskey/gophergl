@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	"github.com/nicholasblaskey/gophergl/Web/gl"
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
@@ -73,7 +73,7 @@ func main() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		rotation := mgl.HomogRotate3D(window.GetTime(),
-			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
+			mgl.Vec3{1.0, 1.0, 0.0}.Normalize()).Mul4(mgl.Scale3D(0.5, 0.5, 0.5))
 		for i := float32(-1.5); i <= 1.5; i += 1.5 {
 			for j := float32(-1.5); j <= 1.5; j += 1.5 {
 				shader.SetMat4("model", mgl.Translate3D(i, j, -8.0).Mul4(rotation))

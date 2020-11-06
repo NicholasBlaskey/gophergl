@@ -168,7 +168,8 @@ func main() {
 		// Draw cube
 		view := camera.LookAt()
 		model := mgl.HomogRotate3D(mgl.DegToRad(45.0),
-			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
+			mgl.Vec3{1.0, 1.0, 0.0}.Normalize()).Mul4(
+			mgl.Scale3D(0.75, 0.75, 0.75))
 
 		shader.Use()
 		shader.SetVec3("light.position", lightPos)

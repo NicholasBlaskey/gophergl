@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
-	"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -84,7 +84,7 @@ func main() {
 			for j := -distApart; j <= distApart; j += distApart {
 				for k := -distApart; k <= distApart; k += distApart {
 					shader.SetMat4("model", mgl.Translate3D(i, j, k).Mul4(
-						rotation).Mul4(mgl.Scale3D(0.5, 0.5, 0.5)))
+						rotation).Mul4(mgl.Scale3D(0.25, 0.25, 0.25)))
 					vao.Draw()
 				}
 			}
