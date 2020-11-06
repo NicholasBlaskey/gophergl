@@ -60,6 +60,55 @@ func NewCube(p VertParams) (uint32, []int32, []float32) {
 
 	numVerts := len(position) / 3
 
+	lenNormal := 0
+	if p.Normals {
+		lenNormal = 3
+		offsets = append(offsets, int32(lenNormal))
+	}
+	normals := []float32{
+		+0.0, +0.0, -1.0,
+		+0.0, +0.0, -1.0,
+		+0.0, +0.0, -1.0,
+		+0.0, +0.0, -1.0,
+		+0.0, +0.0, -1.0,
+		+0.0, +0.0, -1.0,
+
+		+0.0, +0.0, +1.0,
+		+0.0, +0.0, +1.0,
+		+0.0, +0.0, +1.0,
+		+0.0, +0.0, +1.0,
+		+0.0, +0.0, +1.0,
+		+0.0, +0.0, +1.0,
+
+		-1.0, +0.0, +0.0,
+		-1.0, +0.0, +0.0,
+		-1.0, +0.0, +0.0,
+		-1.0, +0.0, +0.0,
+		-1.0, +0.0, +0.0,
+		-1.0, +0.0, +0.0,
+
+		+1.0, +0.0, +0.0,
+		+1.0, +0.0, +0.0,
+		+1.0, +0.0, +0.0,
+		+1.0, +0.0, +0.0,
+		+1.0, +0.0, +0.0,
+		+1.0, +0.0, +0.0,
+
+		+0.0, -1.0, +0.0,
+		+0.0, -1.0, +0.0,
+		+0.0, -1.0, +0.0,
+		+0.0, -1.0, +0.0,
+		+0.0, -1.0, +0.0,
+		+0.0, -1.0, +0.0,
+
+		+0.0, +1.0, +0.0,
+		+0.0, +1.0, +0.0,
+		+0.0, +1.0, +0.0,
+		+0.0, +1.0, +0.0,
+		+0.0, +1.0, +0.0,
+		+0.0, +1.0, +0.0,
+	}
+
 	lenTex := 0
 	if p.TexCoords {
 		lenTex = 2
@@ -113,6 +162,10 @@ func NewCube(p VertParams) (uint32, []int32, []float32) {
 	for i := 0; i < numVerts; i++ {
 		if lenPos != 0 {
 			outVerts = append(outVerts, position[i*lenPos:i*lenPos+lenPos]...)
+		}
+
+		if lenNormal != 0 {
+			outVerts = append(outVerts, normals[i*lenNormal:i*lenNormal+lenNormal]...)
 		}
 
 		if lenTex != 0 {
