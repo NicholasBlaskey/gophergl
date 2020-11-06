@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
-	"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
 )
 
 func init() {
