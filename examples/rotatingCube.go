@@ -43,7 +43,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "texture")
+	window, err := gl.NewWindow(width, height, "rotating cube")
 	if err != nil {
 		panic(err)
 	}

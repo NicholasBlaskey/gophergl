@@ -45,14 +45,16 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "orbital camera")
+	window, err := gl.NewWindow(width, height, "blending")
 	if err != nil {
 		panic(err)
 	}
 	defer window.Terminate()
-	camera := gl.NewOrbitalCamera(window, 5.0, mgl.Vec3{0.0, 0.0, 0.0})
-
 	gl.Enable(gl.DEPTH_TEST)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	camera := gl.NewOrbitalCamera(window, 5.0, mgl.Vec3{0.0, 0.0, 0.0})
 
 	shader, err := gl.CompileShader(vertexShader, fragShader)
 	if err != nil {
@@ -61,7 +63,7 @@ func main() {
 	shader.Use()
 
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true, TexCoords: true}))
-	t1, err := gl.TextureFromFile("./images/gopher.jpg")
+	t1, err := gl.TextureFromFile("./images/window.png")
 	if err != nil {
 		panic(err)
 	}

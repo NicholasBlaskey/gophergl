@@ -71,6 +71,17 @@ func Clear(mask uint32) {
 const (
 	DEPTH_TEST = gl.DEPTH_TEST
 	LEQUAL     = gl.LEQUAL
+
+	BLEND                    = gl.BLEND
+	ONE_MINUS_SRC_ALPHA      = gl.ONE_MINUS_SRC_ALPHA
+	ONE_MINUS_CONSTANT_COLOR = gl.ONE_MINUS_CONSTANT_COLOR
+	ONE_MINUS_DST_ALPHA      = gl.ONE_MINUS_DST_ALPHA
+	ONE_MINUS_DST_COLOR      = gl.ONE_MINUS_DST_COLOR
+	ONE_MINUS_SRC1_ALPHA     = gl.ONE_MINUS_SRC1_ALPHA
+	ONE_MINUS_SRC1_COLOR     = gl.ONE_MINUS_SRC1_COLOR
+	ONE_MINUS_SRC_COLOR      = gl.ONE_MINUS_SRC_COLOR
+
+	SRC_ALPHA = gl.SRC_ALPHA
 )
 
 func Enable(v uint32) {
@@ -79,4 +90,8 @@ func Enable(v uint32) {
 
 func DepthFunc(v uint32) {
 	gl.DepthFunc(v)
+}
+
+func BlendFunc(sFact, dFact uint32) {
+	gl.BlendFunc(sFact, dFact)
 }
