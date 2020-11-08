@@ -60,7 +60,8 @@ func main() {
 	defer window.Terminate()
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	//gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.BlendFunc(0x0302, 0x0303)
 
 	camera := gl.NewOrbitalCamera(window, 5.0, mgl.Vec3{0.0, 0.0, 0.0})
 
