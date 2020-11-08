@@ -3,6 +3,8 @@ package main
 import (
 	"runtime"
 
+	"sort"
+
 	mgl "github.com/go-gl/mathgl/mgl32"
 
 	"github.com/nicholasblaskey/gophergl/Open/gl"
@@ -80,45 +82,42 @@ func main() {
 		float32(width)/float32(height), 0.1, 100.0)
 	shader.SetMat4("projection", projection)
 
+	distApart := float32(0.75)
+	cubes := []struct {
+		color    mgl.Vec3
+		location mgl.Vec3
+	}{
+		{mgl.Vec3{0.9, 0.3, 0.3}, mgl.Vec3{0.0, 0.0, 0.0}},
+		{mgl.Vec3{0.3, 0.9, 0.3}, mgl.Vec3{0.0, +distApart, 0.0}},
+		{mgl.Vec3{0.3, 0.3, 0.9}, mgl.Vec3{0.0, -distApart, 0.0}},
+		{mgl.Vec3{0.9, 0.9, 0.3}, mgl.Vec3{+distApart, 0.0, 0.0}},
+		{mgl.Vec3{0.3, 0.9, 0.9}, mgl.Vec3{-distApart, 0.0, 0.0}},
+		{mgl.Vec3{0.9, 0.3, 0.9}, mgl.Vec3{0.0, 0.0, +distApart}},
+		{mgl.Vec3{0.9, 0.9, 0.9}, mgl.Vec3{0.0, 0.0, -distApart}},
+	}
+
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		shader.SetMat4("view", camera.LookAt())
+		sort.Slice(cubes, func(i, j int) bool {
+			return cubes[i].location.Sub(camera.Position).Len() >
+				cubes[j].location.Sub(camera.Position).Len()
+		})
 
-		distApart := float32(0.75)
-
-		shader.SetVec3("color", mgl.Vec3{0.9, 0.3, 0.3})
-		drawCube(shader, vao, 0.0, 0.0, 0.0)
-
-		shader.SetVec3("color", mgl.Vec3{0.3, 0.9, 0.3})
-		drawCube(shader, vao, 0.0, +distApart, 0.0)
-
-		shader.SetVec3("color", mgl.Vec3{0.3, 0.3, 0.9})
-		drawCube(shader, vao, 0.0, -distApart, 0.0)
-
-		shader.SetVec3("color", mgl.Vec3{0.9, 0.9, 0.3})
-		drawCube(shader, vao, +distApart, 0.0, 0.0)
-
-		shader.SetVec3("color", mgl.Vec3{0.3, 0.9, 0.9})
-		drawCube(shader, vao, -distApart, 0.0, 0.0)
-
-		shader.SetVec3("color", mgl.Vec3{0.9, 0.3, 0.9})
-		drawCube(shader, vao, 0.0, 0.0, +distApart)
-
-		shader.SetVec3("color", mgl.Vec3{0.9, 0.9, 0.9})
-		drawCube(shader, vao, 0.0, 0.0, -distApart)
-
-		//drawCube(shader, vao, 0.0, 0.0, 0.0)
-		//xdrawCube(shader, vao, 0.0, 0.0, 0.0)
+		for _, cube := range cubes {
+			shader.SetVec3("color", cube.color)
+			drawCube(shader, vao, cube.location)
+		}
 
 		window.PollEvents()
 		window.SwapBuffers()
 	})
 }
 
-func drawCube(shader *gl.Shader, vao *gl.VAO, x, y, z float32) {
-	shader.SetMat4("model", mgl.Translate3D(x, y, z).Mul4(
+func drawCube(shader *gl.Shader, vao *gl.VAO, pos mgl.Vec3) {
+	shader.SetMat4("model", mgl.Translate3D(pos[0], pos[1], pos[2]).Mul4(
 		mgl.Scale3D(0.25, 0.25, 0.25)))
 	vao.Draw()
 }
