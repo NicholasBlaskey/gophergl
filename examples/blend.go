@@ -36,10 +36,16 @@ const (
 	in vec2 uv;
 	
 	uniform sampler2D texture1;
+	uniform vec3 color;
 
 	void main()
 	{	
-		FragColor = texture(texture1, uv);	
+		vec4 sampleCol = texture(texture1, uv);
+		if (sampleCol.a == 1.0) {
+			FragColor = sampleCol;
+		} else {
+			FragColor = vec4(color, 0.2);	
+		}
 	}`
 )
 
@@ -73,26 +79,46 @@ func main() {
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
 	shader.SetMat4("projection", projection)
+
 	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		shader.SetMat4("view", camera.LookAt())
 
-		rotation := mgl.HomogRotate3D(window.GetTime(),
-			mgl.Vec3{1.0, 1.0, 0.0}.Normalize())
 		distApart := float32(0.75)
-		for i := -distApart; i <= distApart; i += distApart {
-			for j := -distApart; j <= distApart; j += distApart {
-				for k := -distApart; k <= distApart; k += distApart {
-					shader.SetMat4("model", mgl.Translate3D(i, j, k).Mul4(
-						rotation).Mul4(mgl.Scale3D(0.25, 0.25, 0.25)))
-					vao.Draw()
-				}
-			}
-		}
+
+		shader.SetVec3("color", mgl.Vec3{0.9, 0.3, 0.3})
+		drawCube(shader, vao, 0.0, 0.0, 0.0)
+
+		shader.SetVec3("color", mgl.Vec3{0.3, 0.9, 0.3})
+		drawCube(shader, vao, 0.0, +distApart, 0.0)
+
+		shader.SetVec3("color", mgl.Vec3{0.3, 0.3, 0.9})
+		drawCube(shader, vao, 0.0, -distApart, 0.0)
+
+		shader.SetVec3("color", mgl.Vec3{0.9, 0.9, 0.3})
+		drawCube(shader, vao, +distApart, 0.0, 0.0)
+
+		shader.SetVec3("color", mgl.Vec3{0.3, 0.9, 0.9})
+		drawCube(shader, vao, -distApart, 0.0, 0.0)
+
+		shader.SetVec3("color", mgl.Vec3{0.9, 0.3, 0.9})
+		drawCube(shader, vao, 0.0, 0.0, +distApart)
+
+		shader.SetVec3("color", mgl.Vec3{0.9, 0.9, 0.9})
+		drawCube(shader, vao, 0.0, 0.0, -distApart)
+
+		//drawCube(shader, vao, 0.0, 0.0, 0.0)
+		//xdrawCube(shader, vao, 0.0, 0.0, 0.0)
 
 		window.PollEvents()
 		window.SwapBuffers()
 	})
+}
+
+func drawCube(shader *gl.Shader, vao *gl.VAO, x, y, z float32) {
+	shader.SetMat4("model", mgl.Translate3D(x, y, z).Mul4(
+		mgl.Scale3D(0.25, 0.25, 0.25)))
+	vao.Draw()
 }
