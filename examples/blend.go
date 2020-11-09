@@ -42,12 +42,12 @@ const (
 
 	void main()
 	{	
-		//vec4 sampleCol = texture(texture1, uv);
-//		if (sampleCol.a == 1.0) {
-//			FragColor = sampleCol;
-//		} else {
+		vec4 sampleCol = texture(texture1, uv);
+		if (sampleCol.a == 1.0) {
+			FragColor = sampleCol;
+		} else {
 			FragColor = vec4(color, 0.2);	
-//		}
+		}
 	}`
 )
 
