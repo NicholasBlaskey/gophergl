@@ -7,8 +7,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -58,10 +58,11 @@ func main() {
 		panic(err)
 	}
 	defer window.Terminate()
+
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
-	//gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	gl.BlendFunc(0x0302, 0x0303)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	//gl.BlendFunc(0x0302, 0x0303)
 
 	camera := gl.NewOrbitalCamera(window, 5.0, mgl.Vec3{0.0, 0.0, 0.0})
 
