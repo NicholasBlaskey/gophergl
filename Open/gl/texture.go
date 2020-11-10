@@ -3,8 +3,6 @@ package gl
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 
-	//"fmt"
-
 	"image"
 	"image/draw"
 	_ "image/jpeg"
@@ -67,27 +65,81 @@ func (t *Texture) Generate(width, height int32, data []byte) {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func TextureFromFile(file string) (*Texture, error) {
+func loadImage(file string) ([]byte, int32, int32, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 	defer f.Close()
 
 	img, _, err := image.Decode(f)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 
 	rgba := image.NewRGBA(img.Bounds())
 	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
 
+	return rgba.Pix, int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y), nil
+}
+
+func TextureFromFile(file string) (*Texture, error) {
+	data, width, height, err := loadImage(file)
+	if err != nil {
+		return nil, err
+	}
+
 	t := NewTexture()
-	t.Generate(int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y), rgba.Pix)
+	t.Generate(width, height, data)
 	return t, nil
 }
 
 func (t *Texture) Bind(num uint32) {
 	gl.ActiveTexture(num)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
+}
+
+type Cubemap struct {
+	Right     string
+	Left      string
+	Top       string
+	Bottom    string
+	Front     string
+	Back      string
+	textureID uint32
+}
+
+func (cm *Cubemap) Load() error {
+	var textureID uint32
+	gl.GenTextures(1, &textureID)
+	gl.BindTexture(gl.TEXTURE_CUBE_MAP, textureID)
+
+	for i, path := range []string{cm.Right, cm.Left,
+		cm.Top, cm.Bottom, cm.Front, cm.Back} {
+
+		data, width, height, err := loadImage(path)
+		if err != nil {
+			return err
+		}
+
+		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.RGBA,
+			width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(data))
+	}
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S,
+		gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T,
+		gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R,
+		gl.CLAMP_TO_EDGE)
+
+	cm.textureID = textureID
+
+	return nil
+}
+
+func (cm *Cubemap) Bind(num uint32) {
+	gl.ActiveTexture(num)
+	gl.BindTexture(gl.TEXTURE_CUBE_MAP, cm.textureID)
 }

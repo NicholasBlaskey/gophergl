@@ -5,6 +5,7 @@ import (
 
 	"github.com/gopherjs/gopherjs/js"
 	"time"
+	//	"fmt"
 )
 
 type Window struct {
@@ -67,6 +68,15 @@ func Clear(mask uint32) {
 const (
 	DEPTH_TEST = 0x0B71
 	LEQUAL     = 0x0203
+
+	BLEND                    = 0x0BE2
+	ONE_MINUS_SRC_ALPHA      = 0x0303
+	ONE_MINUS_CONSTANT_COLOR = 0x8002
+	ONE_MINUS_DST_ALPHA      = 0x0305
+	ONE_MINUS_DST_COLOR      = 0x0307
+	ONE_MINUS_SRC_COLOR      = 0x0301
+
+	SRC_ALPHA = 0x0302
 )
 
 func Enable(v uint32) {
@@ -75,4 +85,8 @@ func Enable(v uint32) {
 
 func DepthFunc(v uint32) {
 	webgl.Call("depthFunc", v)
+}
+
+func BlendFunc(sFact, dFact uint32) {
+	webgl.Call("blendFunc", sFact, dFact)
 }
