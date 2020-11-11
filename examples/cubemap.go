@@ -64,7 +64,7 @@ const (
 	uniform samplerCube cubemap;
 	void main() 
 	{
-		FragColor = texture(cubemap, uv);
+		FragColor = textureCube(cubemap, uv);
 	}`
 )
 

@@ -1,8 +1,6 @@
 package gl
 
 import (
-	//"errors"
-
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -140,18 +138,24 @@ func (cm *Cubemap) Load() error {
 		img := js.Global.Get("Image").New()
 		img.Set("src", path)
 
-		img.Call("addEventListener", "load", func() {
-			webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
-			webgl.Call("texImage2D", TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i),
-				0, RGBA, RGBA, UNSIGNED_BYTE, img)
-		}, false)
+		// Need to make a function because the onload is for some reason
+		// always taking i = 5. Honestly don't understand why I feel like
+		// it should bind to the scope. Really wanna know why it isn't binding
+		// from the scope above. Even making a new scope with { doesn't work.
+		// Like honestly wonder if this is a transcompiler bug?
+		func(i int) {
+			img.Call("addEventListener", "load", func() {
+				webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
+				webgl.Call("texImage2D", TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i),
+					0, RGBA, RGBA, UNSIGNED_BYTE, img)
+			}, false)
+		}(i)
 	}
 
-	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
-	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
-	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
-	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE)
-	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_R, CLAMP_TO_EDGE)
+	webgl.Call("texParameteri", TEXTURE_CUBE_MAP, TEXTURE_MIN_FILTER, LINEAR)
+	webgl.Call("texParameteri", TEXTURE_CUBE_MAP, TEXTURE_MAG_FILTER, LINEAR)
+	webgl.Call("texParameteri", TEXTURE_CUBE_MAP, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
+	webgl.Call("texParameteri", TEXTURE_CUBE_MAP, TEXTURE_WRAP_T, CLAMP_TO_EDGE)
 
 	return nil
 }
