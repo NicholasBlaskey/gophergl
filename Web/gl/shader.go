@@ -51,53 +51,72 @@ func CompileShader(vertexCode, fragCode string) (*Shader, error) {
 
 // TODO actually make this work properly instead of just hacks
 func convertToWebShader(shader string, isVertex bool) (string, []string) {
-	attribNames := []string{}
-
 	// Remove version tag
 	shader = strings.ReplaceAll(shader, "#version 410 core", "")
 
-	// Set a default precision if fragment shader
-	if !isVertex {
-		shader = "precision mediump float;\n" + shader
+	if isVertex {
+		return convertVertex(shader)
+	}
+	return convertFragment(shader)
+}
 
-		// Remove out vec4 color;
-		shader = strings.ReplaceAll(shader, "out vec4 FragColor;", "")
-		// Replace color with gl_FragColor
-		shader = strings.ReplaceAll(shader, "FragColor", "gl_FragColor")
-		// Replace in with varying
-		shader = strings.ReplaceAll(shader, "in ", "varying ")
-		// Replace texture with texture2d
-		shader = strings.ReplaceAll(shader, "texture(", "texture2D(")
-	} else {
-		// TODO make this run instead of just relying on location
-		// Replace layout with attribute
-		for i := 0; i < 10; i++ {
-			shader = strings.ReplaceAll(shader,
-				fmt.Sprintf("layout (location = %d) in", i), "attribute")
+func convertVertex(shader string) (string, []string) {
+	attribNames := []string{}
+
+	// TODO make this run instead of just relying on location
+	// Replace layout with attribute
+	for i := 0; i < 10; i++ {
+		shader = strings.ReplaceAll(shader,
+			fmt.Sprintf("layout (location = %d) in", i), "attribute")
+	}
+
+	// Replace out with varying
+	shader = strings.ReplaceAll(shader, "out", "varying")
+
+	// Get all attribute names
+	for _, v := range strings.Split(shader, "\n") {
+		if strings.Contains(v, "void main()") {
+			break
 		}
 
-		// Replace out with varying
-		shader = strings.ReplaceAll(shader, "out", "varying")
-
-		// Get all attribute names
-		for _, v := range strings.Split(shader, "\n") {
-			if strings.Contains(v, "void main()") {
-				break
-			}
-
-			if strings.Contains(v, "attribute") {
-				bySpace := strings.Split(v, " ")
-				attribName := bySpace[len(bySpace)-1]
-				attribNames = append(attribNames, attribName[:len(attribName)-1])
-			}
+		if strings.Contains(v, "attribute") {
+			bySpace := strings.Split(v, " ")
+			attribName := bySpace[len(bySpace)-1]
+			attribNames = append(attribNames, attribName[:len(attribName)-1])
 		}
 	}
 
-	fmt.Println(shader)
-	fmt.Println("ATTRIBS")
-	fmt.Println(len(attribNames), attribNames)
-
 	return shader, attribNames
+}
+
+func convertFragment(shader string) (string, []string) {
+	shader = "precision mediump float;\n" + shader
+
+	// Remove out vec4 color;
+	shader = strings.ReplaceAll(shader, "out vec4 FragColor;", "")
+	// Replace color with gl_FragColor
+	shader = strings.ReplaceAll(shader, "FragColor", "gl_FragColor")
+	// Replace in with varying
+	shader = strings.ReplaceAll(shader, "in ", "varying ")
+	// Replace texture with texture2d
+	shader = strings.ReplaceAll(shader, "texture(", "texture2D(")
+
+	// Handle cubemaps making texture -> textureCube
+	for _, v := range strings.Split(shader, "\n") {
+		if strings.Contains(v, "void main()") {
+			break
+		}
+
+		if strings.Contains(v, "uniform samplerCube") {
+			bySpace := strings.Split(v, " ")
+			cubeName := bySpace[len(bySpace)-1]
+			cubeName = cubeName[:len(cubeName)-1]
+			shader = strings.ReplaceAll(shader, "texture2D("+cubeName,
+				"textureCube("+cubeName)
+		}
+	}
+
+	return shader, nil
 }
 
 func checkError(shader *js.Object) error {

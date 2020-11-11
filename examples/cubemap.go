@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
-	"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -64,7 +64,7 @@ const (
 	uniform samplerCube cubemap;
 	void main() 
 	{
-		FragColor = textureCube(cubemap, uv);
+		FragColor = texture(cubemap, uv);
 	}`
 )
 
