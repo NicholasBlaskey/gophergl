@@ -62,7 +62,7 @@ const (
 
 	void main() 
 	{
-		FragColor = vec4(texture(screenTex, uv).rgb, 1.0);
+		FragColor = vec4(1.0 - texture(screenTex, uv).rgb, 1.0);
 	}`
 )
 
@@ -101,19 +101,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	t1.Bind(gl.TEXTURE0)
-	shader.SetInt("texture1", 0)
-
 	framebuffer := gl.NewFramebuffer(width, height)
 
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
 
 	shader.Use().SetMat4("projection", projection)
+	shader.SetInt("texture1", 0)
 	screenShader.Use().SetInt("screenTex", 0)
+
+	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	window.Run(func() {
 		{ // Render scene to framebuffer
 			framebuffer.Bind()
+			t1.Bind(gl.TEXTURE0)
 			gl.Enable(gl.DEPTH_TEST)
 			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

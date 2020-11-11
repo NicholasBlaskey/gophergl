@@ -98,3 +98,12 @@ func DepthFunc(v uint32) {
 func BlendFunc(sFact, dFact uint32) {
 	gl.BlendFunc(sFact, dFact)
 }
+
+const (
+	FRONT_AND_BACK = gl.FRONT_AND_BACK
+	LINE           = gl.LINE
+)
+
+func PolygonMode(v1, v2 uint32) {
+	gl.PolygonMode(v1, v2)
+}
