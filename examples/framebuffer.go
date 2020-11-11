@@ -41,6 +41,29 @@ const (
 	{	
 		FragColor = texture(texture1, uv);	
 	}`
+
+	screenVertex = `#version 410 core
+	layout (location = 0) in vec2 position;
+	layout (location = 1) in vec2 auv;
+
+	out vec2 uv;
+
+	void main() 
+	{
+		uv = auv;
+		gl_Position = vec4(position.xy, 0.0, 1.0);
+	}`
+
+	screenFrag = `#version 410 core
+	out vec4 FragColor;
+	in vec2 uv;
+
+	uniform sampler2D screenTex;
+
+	void main() 
+	{
+		FragColor = vec4(texture(screenTex, uv).rgb, 1.0);
+	}`
 )
 
 func main() {
@@ -58,9 +81,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	shader.Use()
+	screenShader, err := gl.CompileShader(screenVertex, screenFrag)
+	if err != nil {
+		panic(err)
+	}
 
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true, TexCoords: true}))
+	quadVAO := gl.NewVAO(gl.TRIANGLES, []int32{2, 2}, []float32{
+		-1.0, 1.0, 0.0, 1.0,
+		-1.0, -1.0, 0.0, 0.0,
+		1.0, -1.0, 1.0, 0.0,
+
+		-1.0, 1.0, 0.0, 1.0,
+		1.0, -1.0, 1.0, 0.0,
+		1.0, 1.0, 1.0, 1.0,
+	})
+
 	t1, err := gl.TextureFromFile("./images/gopher.jpg")
 	if err != nil {
 		panic(err)
@@ -68,19 +104,37 @@ func main() {
 	t1.Bind(gl.TEXTURE0)
 	shader.SetInt("texture1", 0)
 
+	framebuffer := gl.NewFramebuffer(width, height)
+
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
-	shader.SetMat4("projection", projection)
+
+	shader.Use().SetMat4("projection", projection)
+	screenShader.Use().SetInt("screenTex", 0)
 	window.Run(func() {
-		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		{ // Render scene to framebuffer
+			framebuffer.Bind()
+			gl.Enable(gl.DEPTH_TEST)
+			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		shader.SetMat4("view", camera.LookAt())
+			shader.Use().SetMat4("view", camera.LookAt())
+			shader.SetMat4("model", mgl.HomogRotate3D(mgl.DegToRad(45.0),
+				mgl.Vec3{0.0, 1.0, 1.0}.Normalize()).Mul4(
+				mgl.Scale3D(0.25, 0.25, 0.25)))
+			vao.Draw()
+		}
 
-		shader.SetMat4("model", mgl.HomogRotate3D(mgl.DegToRad(45.0),
-			mgl.Vec3{0.0, 1.0, 1.0}.Normalize()).Mul4(
-			mgl.Scale3D(0.25, 0.25, 0.25)))
-		vao.Draw()
+		{ // Render framebuffer to screen
+			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+			gl.Disable(gl.DEPTH_TEST)
+			gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+			gl.Clear(gl.COLOR_BUFFER_BIT)
+
+			screenShader.Use()
+			framebuffer.BindTexture(gl.TEXTURE0)
+			quadVAO.Draw()
+		}
 
 		window.PollEvents()
 		window.SwapBuffers()

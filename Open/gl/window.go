@@ -87,6 +87,10 @@ func Enable(v uint32) {
 	gl.Enable(v)
 }
 
+func Disable(v uint32) {
+	gl.Disable(v)
+}
+
 func DepthFunc(v uint32) {
 	gl.DepthFunc(v)
 }
