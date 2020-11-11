@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -70,7 +70,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "orbital camera")
+	window, err := gl.NewWindow(width, height, "cubemap")
 	if err != nil {
 		panic(err)
 	}
@@ -91,50 +91,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	cubemapVAO := gl.NewVAO(gl.TRIANGLES, []int32{3}, []float32{
-		-1.0, 1.0, -1.0,
-		-1.0, -1.0, -1.0,
-		1.0, -1.0, -1.0,
-		1.0, -1.0, -1.0,
-		1.0, 1.0, -1.0,
-		-1.0, 1.0, -1.0,
-
-		-1.0, -1.0, 1.0,
-		-1.0, -1.0, -1.0,
-		-1.0, 1.0, -1.0,
-		-1.0, 1.0, -1.0,
-		-1.0, 1.0, 1.0,
-		-1.0, -1.0, 1.0,
-
-		1.0, -1.0, -1.0,
-		1.0, -1.0, 1.0,
-		1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0,
-		1.0, 1.0, -1.0,
-		1.0, -1.0, -1.0,
-
-		-1.0, -1.0, 1.0,
-		-1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0,
-		1.0, -1.0, 1.0,
-		-1.0, -1.0, 1.0,
-
-		-1.0, 1.0, -1.0,
-		1.0, 1.0, -1.0,
-		1.0, 1.0, 1.0,
-		1.0, 1.0, 1.0,
-		-1.0, 1.0, 1.0,
-		-1.0, 1.0, -1.0,
-
-		-1.0, -1.0, -1.0,
-		-1.0, -1.0, 1.0,
-		1.0, -1.0, -1.0,
-		1.0, -1.0, -1.0,
-		-1.0, -1.0, 1.0,
-		1.0, -1.0, 1.0,
-	})
 
 	t1, err := gl.TextureFromFile("./images/gopher.jpg")
 	if err != nil {
@@ -185,8 +141,7 @@ func main() {
 		cubemapShader.Use().SetMat4("view", view)
 		cubemapShader.SetMat4("projection", projection)
 		cubemap.Bind(gl.TEXTURE0)
-		//vao.Draw()
-		cubemapVAO.Draw()
+		vao.Draw()
 		gl.DepthFunc(gl.LESS)
 
 		window.PollEvents()

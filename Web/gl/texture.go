@@ -33,6 +33,7 @@ const (
 	TEXTURE_MIN_FILTER = 0x2801
 	TEXTURE_WRAP_S     = 0x2802
 	TEXTURE_WRAP_T     = 0x2803
+	TEXTURE_WRAP_R     = 0x8072
 )
 
 type Texture struct {
@@ -99,9 +100,6 @@ func TextureFromFile(file string) (*Texture, error) {
 	img.Set("src", file)
 
 	h, w := img.Get("height").Int(), img.Get("width").Int()
-	//if h == 0 || w == 0 {
-	//return nil, errors.New(file + ": failed to load")
-	//}
 
 	img.Call("addEventListener", "load", func() {
 		webgl.Call("bindTexture", TEXTURE_2D, t.texture)
@@ -116,4 +114,54 @@ func TextureFromFile(file string) (*Texture, error) {
 func (t *Texture) Bind(num uint32) {
 	webgl.Call("activeTexture", num)
 	webgl.Call("bindTexture", TEXTURE_2D, t.texture)
+}
+
+type Cubemap struct {
+	Right   string
+	Left    string
+	Top     string
+	Bottom  string
+	Front   string
+	Back    string
+	texture *js.Object
+}
+
+func (cm *Cubemap) Load() error {
+	cm.texture = webgl.Call("createTexture")
+	webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
+
+	// Bind a single pixel for texture for the time being
+	//webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA,
+	//1, 1, 0, RGBA, UNSIGNED_BYTE, []byte{39, 0, 0, 255})
+
+	for i, path := range []string{cm.Right, cm.Left,
+		cm.Top, cm.Bottom, cm.Front, cm.Back} {
+
+		img := js.Global.Get("Image").New()
+		img.Set("src", path)
+
+		img.Call("addEventListener", "load", func() {
+			webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
+			webgl.Call("texImage2D", TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i),
+				0, RGBA, RGBA, UNSIGNED_BYTE, img)
+		}, false)
+	}
+
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_R, CLAMP_TO_EDGE)
+
+	return nil
+}
+
+const (
+	TEXTURE_CUBE_MAP            = 0x8513
+	TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515
+)
+
+func (cm *Cubemap) Bind(num uint32) {
+	webgl.Call("activeTexture", num)
+	webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
 }

@@ -68,6 +68,7 @@ func Clear(mask uint32) {
 const (
 	DEPTH_TEST = 0x0B71
 	LEQUAL     = 0x0203
+	LESS       = 0x0201
 
 	BLEND                    = 0x0BE2
 	ONE_MINUS_SRC_ALPHA      = 0x0303
