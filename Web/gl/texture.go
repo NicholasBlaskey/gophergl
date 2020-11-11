@@ -128,21 +128,12 @@ func (cm *Cubemap) Load() error {
 	cm.texture = webgl.Call("createTexture")
 	webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
 
-	// Bind a single pixel for texture for the time being
-	//webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA,
-	//1, 1, 0, RGBA, UNSIGNED_BYTE, []byte{39, 0, 0, 255})
-
 	for i, path := range []string{cm.Right, cm.Left,
 		cm.Top, cm.Bottom, cm.Front, cm.Back} {
 
 		img := js.Global.Get("Image").New()
 		img.Set("src", path)
 
-		// Need to make a function because the onload is for some reason
-		// always taking i = 5. Honestly don't understand why I feel like
-		// it should bind to the scope. Really wanna know why it isn't binding
-		// from the scope above. Even making a new scope with { doesn't work.
-		// Like honestly wonder if this is a transcompiler bug?
 		func(i int) {
 			img.Call("addEventListener", "load", func() {
 				webgl.Call("bindTexture", TEXTURE_CUBE_MAP, cm.texture)
