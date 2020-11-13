@@ -3,8 +3,6 @@ package main
 import (
 	"runtime"
 
-	"fmt"
-
 	mgl "github.com/go-gl/mathgl/mgl32"
 
 	//"github.com/nicholasblaskey/gophergl/Open/gl"
@@ -56,25 +54,21 @@ func main() {
 
 	gl.Enable(gl.DEPTH_TEST)
 
-	fmt.Println("b4 shader")
 	shader, err := gl.CompileShader(vertexShader, fragShader)
 	if err != nil {
 		panic(err)
 	}
 	shader.Use()
 
-	fmt.Println("POST SHADER")
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true, TexCoords: true}))
 
-	fmt.Println("B4 texturE")
 	t1, err := gl.TextureFromFile("./images/gopher.jpg")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("B4 buffer")
 	framebuffer := gl.NewFramebuffer(width, height)
+	_ = framebuffer
 
-	fmt.Println("POST FBO")
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
 
@@ -84,6 +78,7 @@ func main() {
 	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	firstRun := true
 	window.Run(func() {
+
 		shader.Use().SetMat4("view", camera.LookAt())
 		shader.SetMat4("model", mgl.HomogRotate3D(mgl.DegToRad(45.0),
 			mgl.Vec3{0.0, 1.0, 1.0}.Normalize()).Mul4(
@@ -104,8 +99,8 @@ func main() {
 
 		{ // Render
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-			//gl.Disable(gl.DEPTH_TEST)
-			gl.ClearColor(0.1, 0.1, 0.1, 0.1)
+
+			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 			framebuffer.BindTexture(gl.TEXTURE0)

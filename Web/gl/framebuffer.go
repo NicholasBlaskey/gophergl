@@ -2,8 +2,6 @@ package gl
 
 import (
 	"github.com/gopherjs/gopherjs/js"
-
-	"fmt"
 )
 
 const (
@@ -37,7 +35,6 @@ type Framebuffer struct {
 }
 
 func NewFramebuffer(width, height int32) *Framebuffer {
-	fmt.Println("HERE?")
 	// Create framebuffer
 	f := &Framebuffer{framebuffer: webgl.Call("createFramebuffer")}
 	webgl.Call("bindFramebuffer", FRAMEBUFFER, f.framebuffer)
@@ -83,8 +80,6 @@ func NewFramebuffer(width, height int32) *Framebuffer {
 	//if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	//}
-
-	fmt.Println("EXIT")
 
 	return f
 }
