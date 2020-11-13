@@ -3,10 +3,12 @@ package main
 import (
 	"runtime"
 
+	"fmt"
+
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
-	//"github.com/nicholasblaskey/gophergl/Web/gl"
+	//"github.com/nicholasblaskey/gophergl/Open/gl"
+	"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -54,19 +56,25 @@ func main() {
 
 	gl.Enable(gl.DEPTH_TEST)
 
+	fmt.Println("b4 shader")
 	shader, err := gl.CompileShader(vertexShader, fragShader)
 	if err != nil {
 		panic(err)
 	}
+	shader.Use()
 
+	fmt.Println("POST SHADER")
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true, TexCoords: true}))
 
+	fmt.Println("B4 texturE")
 	t1, err := gl.TextureFromFile("./images/gopher.jpg")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("B4 buffer")
 	framebuffer := gl.NewFramebuffer(width, height)
 
+	fmt.Println("POST FBO")
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
 

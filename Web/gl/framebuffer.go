@@ -2,17 +2,28 @@ package gl
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+
+	"fmt"
 )
 
 const (
-	FRAMEBUFFER              = 0x8D40
-	RENDERBUFFER             = 0x8D41
-	DEPTH24_STENCIL8         = 0x88F0
-	DEPTH_STENCIL_ATTACHMENT = 0x821A
+	FRAMEBUFFER       = 0x8D40
+	RENDERBUFFER      = 0x8D41
+	DEPTH_COMPONENT16 = 0x81A5
+	//DEPTH24_STENCIL8         = 0x88F0 WEBGL2.0only
+	DEPTH_ATTACHMENT = 0x8D00
+	//DEPTH_STENCIL_ATTACHMENT = 0x821A
+	COLOR_ATTACHMENT0 = 0x8CE0
 )
 
+// This function is broken... since webgl requires the framebuffer to be an
+// object rather than an index. We can cheat it for now.
 func BindFramebuffer(fType, index uint32) {
-	webgl.Call("bindFramebuffer", fType, index)
+	if index != 0 {
+		webgl.Call("bindFramebuffer", fType, index)
+		return
+	}
+	webgl.Call("bindFramebuffer", fType, nil)
 }
 
 // Perhaps it makes sense to have texture textureColorbuffer as a
@@ -26,6 +37,7 @@ type Framebuffer struct {
 }
 
 func NewFramebuffer(width, height int32) *Framebuffer {
+	fmt.Println("HERE?")
 	// Create framebuffer
 	f := &Framebuffer{framebuffer: webgl.Call("createFramebuffer")}
 	webgl.Call("bindFramebuffer", FRAMEBUFFER, f.framebuffer)
@@ -33,14 +45,16 @@ func NewFramebuffer(width, height int32) *Framebuffer {
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, f.framebuffer)
 
 	// Create color attachment texture
-	f.textureColorBuffer = webgl.Call("createTexture")
-	webgl.Call("bindTexture", TEXTURE_2D, f.textureColorBuffer)
-	webgl.Call("texImage2D", gl.TEXTURE_2D, 0, RGBA, width, height,
+	f.textureColorbuffer = webgl.Call("createTexture")
+	webgl.Call("bindTexture", TEXTURE_2D, f.textureColorbuffer)
+	webgl.Call("texImage2D", TEXTURE_2D, 0, RGBA, width, height,
 		0, RGBA, UNSIGNED_BYTE, nil)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_S, CLAMP_TO_EDGE)
+	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_WRAP_T, CLAMP_TO_EDGE)
 	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR)
 	webgl.Call("texParameteri", TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
 	webgl.Call("framebufferTexture2D", FRAMEBUFFER, COLOR_ATTACHMENT0,
-		TEXTURE_2D, f.textureColorBuffer, 0)
+		TEXTURE_2D, f.textureColorbuffer, 0)
 	//gl.GenTextures(1, &f.textureColorbuffer)
 	//gl.BindTexture(gl.TEXTURE_2D, f.textureColorbuffer)
 	//gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height,
@@ -53,9 +67,9 @@ func NewFramebuffer(width, height int32) *Framebuffer {
 	// Create a renderbuffer object for depth and stencil attachment
 	f.rbo = webgl.Call("createRenderbuffer")
 	webgl.Call("bindRenderbuffer", RENDERBUFFER, f.rbo)
-	webgl.Call("renderBufferStorage", RENDERBUFFER, DEPTH24_STENCIL8,
+	webgl.Call("renderbufferStorage", RENDERBUFFER, DEPTH_COMPONENT16,
 		width, height)
-	webgl.Call("framebufferRenderbuffer", FRAMEBUFFER, DEPTH_STENCIL_ATTACHMENT,
+	webgl.Call("framebufferRenderbuffer", FRAMEBUFFER, DEPTH_ATTACHMENT,
 		RENDERBUFFER, f.rbo)
 
 	//gl.GenRenderbuffers(1, &f.rbo)
@@ -70,16 +84,18 @@ func NewFramebuffer(width, height int32) *Framebuffer {
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	//}
 
+	fmt.Println("EXIT")
+
 	return f
 }
 
 func (f *Framebuffer) Bind() {
-	webgl.Call("bindFramebuffer", gl.FRAMEBUFFER, f.framebuffer)
+	webgl.Call("bindFramebuffer", FRAMEBUFFER, f.framebuffer)
 }
 
 func (f *Framebuffer) BindTexture(v uint32) {
 	webgl.Call("activeTexture", v)
-	webgl.Call("bindTexture", gl.TEXTURE_2D, f.textureColorbuffer)
+	webgl.Call("bindTexture", TEXTURE_2D, f.textureColorbuffer)
 }
 
 //func
