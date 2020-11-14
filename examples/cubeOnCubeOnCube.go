@@ -36,10 +36,13 @@ const (
 	in vec2 uv;
 	
 	uniform sampler2D texture1;
-
 	void main()
 	{	
-		FragColor = texture(texture1, uv);	
+		if (uv.x >= 0.98 || uv.y >= 0.98 || uv.x <= 0.02 || uv.y <= 0.02) {
+			FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		} else {
+			FragColor = texture(texture1, uv);	
+		}
 	}`
 )
 
@@ -62,10 +65,6 @@ func main() {
 
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true, TexCoords: true}))
 
-	t1, err := gl.TextureFromFile("./images/gopher.jpg")
-	if err != nil {
-		panic(err)
-	}
 	buffer1 := gl.NewFramebuffer(width, height)
 	buffer2 := gl.NewFramebuffer(width, height)
 
@@ -75,10 +74,8 @@ func main() {
 	shader.Use().SetMat4("projection", projection)
 	shader.SetInt("texture1", 0)
 
-	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
 	firstRun := true
 	window.Run(func() {
-
 		shader.Use().SetMat4("view", camera.LookAt())
 		shader.SetMat4("model", mgl.HomogRotate3D(mgl.DegToRad(45.0),
 			mgl.Vec3{0.0, 1.0, 1.0}.Normalize()).Mul4(
@@ -87,13 +84,6 @@ func main() {
 		// Render scene to framebuffer (either once or keep going remove the || true if only once)
 		var endingBuffer *gl.Framebuffer
 		if firstRun || true {
-			buffer1.Bind()
-			t1.Bind(gl.TEXTURE0)
-			gl.Enable(gl.DEPTH_TEST)
-			gl.ClearColor(0.3, 0.7, 0.3, 1.0)
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			vao.Draw()
-
 			colors := []mgl.Vec3{
 				mgl.Vec3{0.7, 0.3, 0.3},
 				mgl.Vec3{0.3, 0.7, 0.3},
@@ -101,10 +91,12 @@ func main() {
 				mgl.Vec3{0.7, 0.7, 0.3},
 				mgl.Vec3{0.3, 0.7, 0.7},
 				mgl.Vec3{0.7, 0.3, 0.7},
+				mgl.Vec3{0.65, 0.75, 0.85},
+				mgl.Vec3{0.75, 0.65, 0.85},
 				mgl.Vec3{1.0, 1.0, 1.0},
 			}
 			for i, col := range colors {
-				if i%2 == 0 {
+				if i%2 != 0 {
 					buffer2.Bind()
 					buffer1.BindTexture(gl.TEXTURE0)
 					endingBuffer = buffer2
@@ -117,24 +109,10 @@ func main() {
 				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 				vao.Draw()
 			}
-
-			/*
-				buffer2.Bind()
-				buffer1.BindTexture(gl.TEXTURE0)
-				gl.ClearColor(0.7, 0.3, 0.3, 1.0)
-				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-				vao.Draw()
-
-				buffer1.Bind()
-				buffer2.BindTexture(gl.TEXTURE0)
-				gl.ClearColor(1.0, 1.0, 1.0, 1.0)
-				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-				vao.Draw()
-			*/
 			firstRun = false
 		}
 
-		{ // Render
+		{ // Render to screen
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
