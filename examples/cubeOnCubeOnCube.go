@@ -5,8 +5,8 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
-	"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -45,7 +45,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "framebuffer")
+	window, err := gl.NewWindow(width, height, "cube on cube on cube on cube")
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +66,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	framebuffer := gl.NewFramebuffer(width, height)
+	buffer1 := gl.NewFramebuffer(width, height)
+	buffer2 := gl.NewFramebuffer(width, height)
 
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
 		float32(width)/float32(height), 0.1, 100.0)
@@ -84,25 +85,61 @@ func main() {
 			mgl.Scale3D(1.25, 1.25, 1.25)))
 
 		// Render scene to framebuffer (either once or keep going remove the || true if only once)
+		var endingBuffer *gl.Framebuffer
 		if firstRun || true {
-			framebuffer.Bind()
+			buffer1.Bind()
 			t1.Bind(gl.TEXTURE0)
 			gl.Enable(gl.DEPTH_TEST)
-			gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+			gl.ClearColor(0.3, 0.7, 0.3, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
 			vao.Draw()
 
+			colors := []mgl.Vec3{
+				mgl.Vec3{0.7, 0.3, 0.3},
+				mgl.Vec3{0.3, 0.7, 0.3},
+				mgl.Vec3{0.3, 0.3, 0.7},
+				mgl.Vec3{0.7, 0.7, 0.3},
+				mgl.Vec3{0.3, 0.7, 0.7},
+				mgl.Vec3{0.7, 0.3, 0.7},
+				mgl.Vec3{1.0, 1.0, 1.0},
+			}
+			for i, col := range colors {
+				if i%2 == 0 {
+					buffer2.Bind()
+					buffer1.BindTexture(gl.TEXTURE0)
+					endingBuffer = buffer2
+				} else {
+					buffer1.Bind()
+					buffer2.BindTexture(gl.TEXTURE0)
+					endingBuffer = buffer1
+				}
+				gl.ClearColor(col[0], col[1], col[2], 1.0)
+				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+				vao.Draw()
+			}
+
+			/*
+				buffer2.Bind()
+				buffer1.BindTexture(gl.TEXTURE0)
+				gl.ClearColor(0.7, 0.3, 0.3, 1.0)
+				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+				vao.Draw()
+
+				buffer1.Bind()
+				buffer2.BindTexture(gl.TEXTURE0)
+				gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+				gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+				vao.Draw()
+			*/
 			firstRun = false
 		}
 
 		{ // Render
 			gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
 			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-			framebuffer.BindTexture(gl.TEXTURE0)
+			endingBuffer.BindTexture(gl.TEXTURE0)
 			vao.Draw()
 		}
 
