@@ -211,33 +211,65 @@ func NewSphere(p VertParams) (uint32, []int32, []float32) {
 		}
 	}
 
+	data := []float32{}
 	oddRow := false
 	for y := 0; y < ySegments; y++ {
 		if oddRow {
 			for x := 0; x <= xSegments; x++ {
-				indices = append(indices, uint32(y*(xSegments+1)+x))
-				indices = append(indices, uint32((y+1)*(xSegments+1)+x))
+				indexes := []int{y*(xSegments+1) + x, (y+1)*(xSegments+1) + x}
+				for _, i := range indexes {
+
+					//index2 := (y+1)*(xSegments+1) + x
+					data = append(data, positions[i][0], positions[i][1],
+						positions[i][2])
+					data = append(data, uv[i][0], uv[i][1])
+					data = append(data, normals[i][0], normals[i][1], normals[i][2])
+
+				}
+				//_ = index2
+				//indices = append(indices, uint32(y*(xSegments+1)+x))
+				//indices = append(indices, uint32((y+1)*(xSegments+1)+x))
 			}
 		} else {
 			for x := xSegments; x >= 0; x-- {
-				indices = append(indices, uint32((y+1)*(xSegments+1)+x))
-				indices = append(indices, uint32(y*(xSegments+1)+x))
+				//indices = append(indices, uint32((y+1)*(xSegments+1)+x))
+				//indices = append(indices, uint32(y*(xSegments+1)+x))
 			}
 		}
 		oddRow = !oddRow
 	}
-	//indexCount = uint32(len(indices))
 
-	data := []float32{}
-	for i := 0; i < len(positions); i++ {
-		data = append(data, positions[i][0], positions[i][1], positions[i][2])
-		if len(uv) > 0 {
-			data = append(data, uv[i][0], uv[i][1])
+	_ = indices
+
+	/*
+		oddRow := false
+		for y := 0; y < ySegments; y++ {
+			if oddRow {
+				for x := 0; x <= xSegments; x++ {
+					indices = append(indices, uint32(y*(xSegments+1)+x))
+					indices = append(indices, uint32((y+1)*(xSegments+1)+x))
+				}
+			} else {
+				for x := xSegments; x >= 0; x-- {
+					indices = append(indices, uint32((y+1)*(xSegments+1)+x))
+					indices = append(indices, uint32(y*(xSegments+1)+x))
+				}
+			}
+			oddRow = !oddRow
 		}
-		if len(normals) > 0 {
-			data = append(data, normals[i][0], normals[i][1], normals[i][2])
+	*/
+	/*
+		data := []float32{}
+		for i := 0; i < len(positions); i++ {
+			data = append(data, positions[i][0], positions[i][1], positions[i][2])
+			if len(uv) > 0 {
+				data = append(data, uv[i][0], uv[i][1])
+			}
+			if len(normals) > 0 {
+				data = append(data, normals[i][0], normals[i][1], normals[i][2])
+			}
 		}
-	}
+	*/
 
 	offsets := []int32{3, 2, 3}
 	return TRIANGLE_STRIP, offsets, data
