@@ -1,8 +1,6 @@
 package common
 
 import (
-	"fmt"
-
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"math"
 )
@@ -250,8 +248,6 @@ func NewSphere(p VertParams) (uint32, []int32, []float32) {
 		}
 		oddRow = !oddRow
 	}
-
-	fmt.Println(offsets, len(positions), len(uv), len(normals), len(data))
 
 	return TRIANGLE_STRIP, offsets, data
 }
