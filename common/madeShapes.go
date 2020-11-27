@@ -1,6 +1,8 @@
 package common
 
 import (
+	"fmt"
+
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"math"
 )
@@ -186,11 +188,22 @@ func NewCube(p VertParams) (uint32, []int32, []float32) {
 	return TRIANGLES, offsets, outVerts
 }
 
+// TODO rework premade shapes to use an ebo
 func NewSphere(p VertParams) (uint32, []int32, []float32) {
 	positions := []mgl.Vec3{}
 	uv := []mgl.Vec2{}
 	normals := []mgl.Vec3{}
-	indices := []uint32{}
+
+	offsets := []int32{}
+	if p.Position {
+		offsets = append(offsets, 3)
+	}
+	if p.TexCoords {
+		offsets = append(offsets, 2)
+	}
+	if p.Normals {
+		offsets = append(offsets, 3)
+	}
 
 	xSegments := 64
 	ySegments := 64
@@ -205,9 +218,15 @@ func NewSphere(p VertParams) (uint32, []int32, []float32) {
 			zPos := float32(math.Sin(float64(xSegment*2.0*pi)) *
 				math.Sin(float64(ySegment*pi)))
 
-			positions = append(positions, mgl.Vec3{xPos, yPos, zPos})
-			uv = append(uv, mgl.Vec2{xSegment, ySegment})
-			normals = append(normals, mgl.Vec3{xPos, yPos, zPos})
+			if p.Position {
+				positions = append(positions, mgl.Vec3{xPos, yPos, zPos})
+			}
+			if p.TexCoords {
+				uv = append(uv, mgl.Vec2{xSegment, ySegment})
+			}
+			if p.Normals {
+				normals = append(normals, mgl.Vec3{xPos, yPos, zPos})
+			}
 		}
 	}
 
@@ -218,59 +237,36 @@ func NewSphere(p VertParams) (uint32, []int32, []float32) {
 			for x := 0; x <= xSegments; x++ {
 				indexes := []int{y*(xSegments+1) + x, (y+1)*(xSegments+1) + x}
 				for _, i := range indexes {
-
-					//index2 := (y+1)*(xSegments+1) + x
-					data = append(data, positions[i][0], positions[i][1],
-						positions[i][2])
-					data = append(data, uv[i][0], uv[i][1])
-					data = append(data, normals[i][0], normals[i][1], normals[i][2])
-
+					appendDataSphere(&data, positions, uv, normals, p, i)
 				}
-				//_ = index2
-				//indices = append(indices, uint32(y*(xSegments+1)+x))
-				//indices = append(indices, uint32((y+1)*(xSegments+1)+x))
 			}
 		} else {
 			for x := xSegments; x >= 0; x-- {
-				//indices = append(indices, uint32((y+1)*(xSegments+1)+x))
-				//indices = append(indices, uint32(y*(xSegments+1)+x))
+				indexes := []int{(y+1)*(xSegments+1) + x, y*(xSegments+1) + x}
+				for _, i := range indexes {
+					appendDataSphere(&data, positions, uv, normals, p, i)
+				}
 			}
 		}
 		oddRow = !oddRow
 	}
 
-	_ = indices
+	fmt.Println(offsets, len(positions), len(uv), len(normals), len(data))
 
-	/*
-		oddRow := false
-		for y := 0; y < ySegments; y++ {
-			if oddRow {
-				for x := 0; x <= xSegments; x++ {
-					indices = append(indices, uint32(y*(xSegments+1)+x))
-					indices = append(indices, uint32((y+1)*(xSegments+1)+x))
-				}
-			} else {
-				for x := xSegments; x >= 0; x-- {
-					indices = append(indices, uint32((y+1)*(xSegments+1)+x))
-					indices = append(indices, uint32(y*(xSegments+1)+x))
-				}
-			}
-			oddRow = !oddRow
-		}
-	*/
-	/*
-		data := []float32{}
-		for i := 0; i < len(positions); i++ {
-			data = append(data, positions[i][0], positions[i][1], positions[i][2])
-			if len(uv) > 0 {
-				data = append(data, uv[i][0], uv[i][1])
-			}
-			if len(normals) > 0 {
-				data = append(data, normals[i][0], normals[i][1], normals[i][2])
-			}
-		}
-	*/
-
-	offsets := []int32{3, 2, 3}
 	return TRIANGLE_STRIP, offsets, data
+}
+
+func appendDataSphere(data *[]float32, positions []mgl.Vec3,
+	uv []mgl.Vec2, normals []mgl.Vec3, p VertParams, i int) {
+
+	if p.Position {
+		*data = append(*data, positions[i][0], positions[i][1],
+			positions[i][2])
+	}
+	if p.TexCoords {
+		*data = append(*data, uv[i][0], uv[i][1])
+	}
+	if p.Normals {
+		*data = append(*data, normals[i][0], normals[i][1], normals[i][2])
+	}
 }
