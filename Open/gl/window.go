@@ -107,3 +107,13 @@ const (
 func PolygonMode(v1, v2 uint32) {
 	gl.PolygonMode(v1, v2)
 }
+
+var prevTime float32 = 0.0
+
+// First time called with just return 0.0
+func (w *Window) GetDT() float32 {
+	curTime := w.GetTime()
+	dt := curTime - prevTime
+	prevTime = curTime
+	return dt
+}
