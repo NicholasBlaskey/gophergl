@@ -91,3 +91,12 @@ func DepthFunc(v uint32) {
 func BlendFunc(sFact, dFact uint32) {
 	webgl.Call("blendFunc", sFact, dFact)
 }
+
+var prevTime float32 = 0.0
+
+func (w *Window) GetDT() float32 {
+	curTime := w.GetTime()
+	dt := curTime - prevTime
+	prevTime = curTime
+	return dt
+}
