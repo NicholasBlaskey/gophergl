@@ -5,8 +5,10 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	//"github.com/nicholasblaskey/gophergl/Open/gl"
-	"github.com/nicholasblaskey/gophergl/Web/gl"
+	"github.com/nicholasblaskey/gophergl/Open/gl"
+
+	"math/rand"
+	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
 func init() {
@@ -40,7 +42,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "cube bouncing")
+	window, err := gl.NewWindow(width, height, "bounce pyramid")
 	if err != nil {
 		panic(err)
 	}
@@ -61,20 +63,43 @@ func main() {
 		float32(width)/float32(height), 0.1, 100.0)
 	shader.SetMat4("projection", projection)
 
-	yVelocity, yPos := float32(0), float32(5)
-	window.Run(func() {
-		yVelocity, yPos = updatePosVel(window.GetDT(), yVelocity, yPos)
+	startingHeight := float32(7.5)
+	cubeWidth := float32(0.10)
+	dim := 5
+	cubeVelocities := []float32{}
+	cubePositions := []mgl.Vec3{}
+	cubeCols := []mgl.Vec3{}
+	for i := 0; i < dim; i++ {
+		for j := 0; j < dim; j++ {
+			cubePositions = append(cubePositions, mgl.Vec3{
+				float32(i) * cubeWidth * 2,
+				float32(j) * cubeWidth * 2, startingHeight})
+			cubeCols = append(cubeCols, mgl.Vec3{
+				rand.Float32(), rand.Float32(), rand.Float32()})
+			cubeVelocities = append(cubeVelocities, 0.0)
+		}
+	}
 
+	window.Run(func() {
 		gl.ClearColor(0.1, 0.1, 0.1, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		shader.SetMat4("view", camera.LookAt())
 
-		// Draw the cube bouncing
-		shader.SetVec3("col", mgl.Vec3{0.7, 0.3, 0.3})
-		shader.SetMat4("model", mgl.Translate3D(0, 0, yPos).Mul4(
-			mgl.Scale3D(0.25, 0.25, 0.25)))
-		vao.Draw()
+		// Draw the cube pyramid
+		dt := window.GetDT()
+		for i := 0; i < len(cubeCols); i++ {
+			vel, pos := updatePosVel(dt, cubeVelocities[i], cubePositions[i][2])
+			cubeVelocities[i] = vel
+			cubePositions[i][2] = pos
+
+			shader.SetVec3("col", cubeCols[i])
+			shader.SetMat4("model", mgl.Translate3D(
+				cubePositions[i][0], cubePositions[i][1],
+				cubePositions[i][2]).Mul4(
+				mgl.Scale3D(cubeWidth, cubeWidth, cubeWidth)))
+			vao.Draw()
+		}
 
 		// Draw the floor
 		shader.SetVec3("col", mgl.Vec3{0.3, 0.7, 0.3})
