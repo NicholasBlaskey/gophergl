@@ -5,12 +5,10 @@ import (
 
 	mgl "github.com/go-gl/mathgl/mgl32"
 
-	"github.com/nicholasblaskey/gophergl/Open/gl"
-
-	//"fmt"
-
 	"math"
 	"math/rand"
+
+	"github.com/nicholasblaskey/gophergl/Open/gl"
 	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
 
@@ -67,26 +65,36 @@ func main() {
 	shader.SetMat4("projection", projection)
 
 	// Create the cube pyramid
-	startingHeight := float32(7.5)
-	levelDiff := float32(0.10)
+	startingHeight := float32(50)
+	levelDiff := float32(0.50)
 	cubeWidth := float32(0.10)
-	dim := 25 // Only works for odd values as a simplification
+	dim := 51 // Only works for odd values as a simplification
 	center := float32(dim/2) * cubeWidth * 2
 	cubeVelocities := []float32{}
 	cubePositions := []mgl.Vec3{}
 	cubeCols := []mgl.Vec3{}
+
+	colors := []mgl.Vec3{}
+	for i := 0; i < dim/2+1; i++ {
+		colors = append(colors, mgl.Vec3{
+			rand.Float32(), rand.Float32(), rand.Float32()})
+	}
+
 	for i := 0; i < dim; i++ {
 		for j := 0; j < dim; j++ {
 			x, y := float32(i)*cubeWidth*2, float32(j)*cubeWidth*2
 
-			cubePositions = append(cubePositions, mgl.Vec3{
-				x, y, startingHeight - levelDiff*float32(math.Round(math.Max(
-					math.Abs(float64(center-x)),
-					math.Abs(float64(center-y)),
-				)/float64(cubeWidth*2)))})
+			level := float32(math.Round(math.Max(
+				math.Abs(float64(center-x)),
+				math.Abs(float64(center-y)),
+			) / float64(cubeWidth*2)))
 
-			cubeCols = append(cubeCols, mgl.Vec3{
-				rand.Float32(), rand.Float32(), rand.Float32()})
+			cubePositions = append(cubePositions, mgl.Vec3{
+				x, y, startingHeight - levelDiff*level})
+
+			cubeCols = append(cubeCols, colors[int(level)])
+			//cubeCols = append(cubeCols, mgl.Vec3{
+			//rand.Float32(), rand.Float32(), rand.Float32()})
 			cubeVelocities = append(cubeVelocities, 0.0)
 		}
 	}
@@ -114,7 +122,7 @@ func main() {
 		// Draw the floor
 		shader.SetVec3("col", mgl.Vec3{0.3, 0.7, 0.3})
 		shader.SetMat4("model", mgl.Translate3D(0, 0, -0.25).Mul4(
-			mgl.Scale3D(10, 10, 0.0001)))
+			mgl.Scale3D(100, 100, 0.0001)))
 		vao.Draw()
 
 		window.PollEvents()
