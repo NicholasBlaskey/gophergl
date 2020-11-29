@@ -7,6 +7,9 @@ import (
 
 	"github.com/nicholasblaskey/gophergl/Open/gl"
 
+	//"fmt"
+
+	"math"
 	"math/rand"
 	//"github.com/nicholasblaskey/gophergl/Web/gl"
 )
@@ -63,17 +66,25 @@ func main() {
 		float32(width)/float32(height), 0.1, 100.0)
 	shader.SetMat4("projection", projection)
 
+	// Create the cube pyramid
 	startingHeight := float32(7.5)
+	levelDiff := float32(0.10)
 	cubeWidth := float32(0.10)
-	dim := 5
+	dim := 25 // Only works for odd values as a simplification
+	center := float32(dim/2) * cubeWidth * 2
 	cubeVelocities := []float32{}
 	cubePositions := []mgl.Vec3{}
 	cubeCols := []mgl.Vec3{}
 	for i := 0; i < dim; i++ {
 		for j := 0; j < dim; j++ {
+			x, y := float32(i)*cubeWidth*2, float32(j)*cubeWidth*2
+
 			cubePositions = append(cubePositions, mgl.Vec3{
-				float32(i) * cubeWidth * 2,
-				float32(j) * cubeWidth * 2, startingHeight})
+				x, y, startingHeight - levelDiff*float32(math.Round(math.Max(
+					math.Abs(float64(center-x)),
+					math.Abs(float64(center-y)),
+				)/float64(cubeWidth*2)))})
+
 			cubeCols = append(cubeCols, mgl.Vec3{
 				rand.Float32(), rand.Float32(), rand.Float32()})
 			cubeVelocities = append(cubeVelocities, 0.0)
@@ -86,7 +97,6 @@ func main() {
 
 		shader.SetMat4("view", camera.LookAt())
 
-		// Draw the cube pyramid
 		dt := window.GetDT()
 		for i := 0; i < len(cubeCols); i++ {
 			vel, pos := updatePosVel(dt, cubeVelocities[i], cubePositions[i][2])
