@@ -43,7 +43,7 @@ const (
 
 func main() {
 	width, height := int32(800), int32(600)
-	window, err := gl.NewWindow(width, height, "bounce pyramid")
+	window, err := gl.NewWindow(width, height, "bounce pyramid 2")
 	if err != nil {
 		panic(err)
 	}
@@ -61,12 +61,12 @@ func main() {
 	vao := gl.NewVAO(gl.NewCube(gl.VertParams{Position: true}))
 
 	projection := mgl.Perspective(mgl.DegToRad(45.0),
-		float32(width)/float32(height), 0.1, 100.0)
+		float32(width)/float32(height), 0.1, 300.0)
 	shader.SetMat4("projection", projection)
 
 	// Create the cube pyramid
 	startingHeight := float32(50)
-	levelDiff := float32(0.75)
+	levelDiff := float32(0.01)
 	cubeWidth := float32(0.10)
 	dim := 81 // Only works for odd values as a simplification
 	center := float32(dim/2) * cubeWidth * 2
@@ -90,12 +90,17 @@ func main() {
 			) / float64(cubeWidth*2)))
 
 			cubePositions = append(cubePositions, mgl.Vec3{
-				x, y, startingHeight - levelDiff*level})
-
+				x, y, startingHeight})
 			cubeCols = append(cubeCols, colors[int(level)])
-			//cubeCols = append(cubeCols, mgl.Vec3{
-			//rand.Float32(), rand.Float32(), rand.Float32()})
 			cubeVelocities = append(cubeVelocities, 0.0)
+
+			index := len(cubePositions) - 1
+			for i := 0; i < int(level); i++ {
+				vel, pos := updatePosVel(levelDiff, cubeVelocities[index], cubePositions[index][2])
+				cubeVelocities[index] = vel
+				cubePositions[index][2] = pos
+			}
+
 		}
 	}
 
